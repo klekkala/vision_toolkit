@@ -1,3 +1,8 @@
-add_executable(3dobj_tracking pano.cpp)
+set(ProgramName "3dobj_tracking_pano")
 
-target_link_libraries( 3dobj_tracking ${OpenCV_LIBS} )
+add_executable(${ProgramName} pano.cpp)
+
+target_link_libraries( ${ProgramName} LINK_PUBLIC
+   ${OpenCV_LIBS}
+   ${Boost_LIBRARIES}
+)

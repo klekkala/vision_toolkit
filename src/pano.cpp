@@ -18,8 +18,23 @@ using namespace boost::program_options;
 static constexpr cv::Stitcher::Mode mode = cv::Stitcher::PANORAMA;
 
 int main(int argc, const char *argv[]) {
-   // TODO: Add commandline arg parsing (with boost?)
+   // Parse commandline args
+   std::string in_path, out_path;
 
+   // clang-format off
+   options_description desc("Allowed options");
+   desc.add_options()
+      ("input,i", value<std::string>(&in_path),
+       "Input location for input images")
+      ("output,o", value<std::string>(&out_path),
+       "Output location for stitched panorama");
+   // clang-format on
+
+   variables_map vm;
+   store(parse_command_line(argc, argv, desc), vm);
+   notify(vm);
+
+   // Dummy code
    cv::Mat pano;
    cv::Ptr<cv::Stitcher> stitcher = cv::Stitcher::create(mode);
 
