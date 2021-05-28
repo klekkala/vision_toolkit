@@ -13,7 +13,7 @@ find_package( Boost
 
 include_directories( 
    ${OpenCV_INCLUDE_DIRS} 
-   ${Boost_INCLUDE_DIRS}   
+   ${Boost_INCLUDE_DIRS}
 )
 
 add_subdirectory(src)

@@ -1,8 +1,2 @@
-set(ProgramName "3dobj_tracking_pano")
-
-add_executable(${ProgramName} pano.cpp)
-
-target_link_libraries( ${ProgramName} LINK_PUBLIC
-   ${OpenCV_LIBS}
-   ${Boost_LIBRARIES}
-)
+add_subdirectory(pano)
+add_subdirectory(aruco)

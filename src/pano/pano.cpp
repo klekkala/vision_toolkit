@@ -1,6 +1,6 @@
 /* Panoramic stitching implementation
  *
- * \file src/pano.cpp
+ * \file src/pano/pano.cpp
  * \author Mihai Bibireata (bibireat@usc.edu)
  * \author Slava Zinevich (zinevich@usc.edu)
  * \date May 26 2021
