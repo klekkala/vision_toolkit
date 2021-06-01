@@ -24,8 +24,8 @@ static constexpr cv::Stitcher::Mode mode = cv::Stitcher::PANORAMA;
 int main(int argc, const char *argv[]) {
 
   CliParser parser(argc, argv);
-  parser.Parse();
   ImageIO image_io(parser);
+  parser.Parse();
   auto imgs = image_io.ImportImages();
 
   // Dummy code
