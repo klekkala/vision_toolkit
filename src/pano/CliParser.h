@@ -1,39 +1,29 @@
 //
 // Created by Slava Zinevich on 5/29/21.
+// Edited by Mihai Bibireata on 5/30/21.
 //
 
-#ifndef INC_3DOBJECT_TRACKING_CLIPARSER_H
-#define INC_3DOBJECT_TRACKING_CLIPARSER_H
-
-
-#include <iostream>
+#pragma once
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/stitching.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
-using namespace std;
-using namespace boost::program_options;
-using boost::filesystem::path;
-
 class CliParser
 {
 public:
     CliParser(int argc, const char * const * argv);
-    void AddArgument(string arg_names);
-    void AddArgument(string arg_names, string explanation);
+    void AddArgument(const std::string& arg_names);
+    void AddArgument(const std::string& arg_names, const std::string& explanation);
     void Parse();
-    string GetArgument(string arg);
+    std::string GetArgument(const std::string& arg);
 
 private:
     bool _hasParsed = false;
-    std::map<string, string*> _arg_map;
-    options_description _desc;
-    variables_map _vm;
+    std::map<std::string, std::string*> _arg_map;
+    boost::program_options::options_description _desc;
+    boost::program_options::variables_map _vm;
     int _argc;
     const char * const * _argv;
 };
-
-
-#endif //INC_3DOBJECT_TRACKING_CLIPARSER_H

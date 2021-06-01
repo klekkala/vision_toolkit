@@ -15,11 +15,10 @@ using namespace std;
 using namespace boost::program_options;
 using boost::filesystem::path;
 
-
 CliParser::CliParser(int argc, const char * const * argv) : _argc(argc), _argv(argv)
 {
 }
-void CliParser::AddArgument(string arg_names, string explanation)
+void CliParser::AddArgument(const string& arg_names, const string& explanation)
 {
     string* in = new string("hello");
     _desc.add_options()
@@ -40,7 +39,7 @@ void CliParser::Parse() {
     _hasParsed = true;
 }
 
-string CliParser::GetArgument(string arg)
+string CliParser::GetArgument(const string& arg)
 {
     auto search_result = _arg_map.find(arg);
     if(search_result == _arg_map.end())

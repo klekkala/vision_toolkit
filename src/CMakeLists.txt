@@ -1,2 +1,2 @@
-add_subdirectory(pano)
 add_subdirectory(aruco)
+add_subdirectory(pano)
