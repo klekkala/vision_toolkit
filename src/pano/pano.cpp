@@ -8,12 +8,13 @@
 
 #include <iostream>
 
-#include "CliParser.h"
-#include "ImageIO.h"
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/stitching.hpp>
+
+#include "common/CliParser.h"
+#include "common/ImageIO.h"
 
 using namespace std;
 using namespace boost::program_options;
@@ -22,11 +23,13 @@ using boost::filesystem::path;
 static constexpr cv::Stitcher::Mode mode = cv::Stitcher::PANORAMA;
 
 int main(int argc, const char *argv[]) {
-
   CliParser parser(argc, argv);
-  ImageIO image_io(parser);
+  parser.AddArgument("input,i", "Input location for input images");
+  parser.AddArgument("output,o", "Output location for stitched panorama");
   parser.Parse();
-  auto imgs = image_io.ImportImages();
+
+  ImageIO image_io;
+  auto imgs = image_io.Read(parser.GetArgument("i"));
 
   // Dummy code
   cv::Mat pano;
@@ -34,7 +37,7 @@ int main(int argc, const char *argv[]) {
   std::cout << "Number of images: " << imgs.size() << std::endl;
 
   cv::Stitcher::Status status = stitcher->stitch(imgs, pano);
-  image_io.Write(pano);
+  image_io.Write(parser.GetArgument("o"), pano);
 
   return 0;
 }

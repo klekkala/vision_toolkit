@@ -15,11 +15,6 @@ using namespace std;
 using namespace boost::program_options;
 using boost::filesystem::path;
 
-ImageIO::ImageIO(CliParser &parser) : _parser(parser) {
-  parser.AddArgument("input,i", "Input location for input images");
-  parser.AddArgument("output,o", "Output location for stitched panorama");
-}
-
 std::vector<cv::Mat> ImageIO::Read(const string &in_str) {
   std::vector<cv::Mat> images;
   path in_path = path(in_str);
@@ -34,13 +29,6 @@ std::vector<cv::Mat> ImageIO::Read(const string &in_str) {
   return images;
 }
 
-void ImageIO::Write(const cv::Mat &img) {
-  auto out_path = _parser.GetArgument("o");
-  cv::imwrite(out_path, img);
-}
-
-std::vector<cv::Mat> ImageIO::ImportImages() {
-  _parser.Parse();
-  auto arg = _parser.GetArgument("i");
-  return Read(arg);
+void ImageIO::Write(const string &out_str, const cv::Mat &img) {
+  cv::imwrite(out_str, img);
 }

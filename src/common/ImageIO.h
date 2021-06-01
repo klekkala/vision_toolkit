@@ -9,11 +9,7 @@
 
 class ImageIO {
 public:
-  ImageIO(CliParser &parser);
+  ImageIO() {};
   std::vector<cv::Mat> Read(const std::string& in_str);
-  void Write(const cv::Mat &img);
-  std::vector<cv::Mat> ImportImages();
-
-private:
-  CliParser &_parser;
+  void Write(const std::string &out_str, const cv::Mat &img);
 };
