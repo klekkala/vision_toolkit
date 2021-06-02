@@ -10,10 +10,20 @@ find_package( Boost
 
    REQUIRED
 )
+find_package( catkin 
+   REQUIRED
+   COMPONENTS
+      roscpp
+      sensor_msgs
+      cv_bridge
+      std_msgs
+      image_transport
+)
 
 include_directories( 
    ${OpenCV_INCLUDE_DIRS} 
    ${Boost_INCLUDE_DIRS}
+   ${catkin_INCLUDE_DIRS}
 )
 
 add_subdirectory(src)

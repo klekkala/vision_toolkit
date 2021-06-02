@@ -5,4 +5,5 @@ add_executable(${ProgramName} aruco_pose.cpp)
 target_link_libraries( ${ProgramName} LINK_PUBLIC
    ${OpenCV_LIBS}
    ${Boost_LIBRARIES}
+   ${catkin_LIBRARIES}
 )

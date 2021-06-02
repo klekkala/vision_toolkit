@@ -20,3 +20,5 @@ or
 cmake -G Ninja ../
 ninja
 ```
+
+ROS version: http://wiki.ros.org/melodic/Installation (Recommended for Ubuntu 18.04 which is what I have)
