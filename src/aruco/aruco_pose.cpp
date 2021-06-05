@@ -15,21 +15,12 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
-// ROS stuff
-#include <ros/ros.h>
-#include <image_transport/image_transport.h>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
 
 #include "common/CliParser.h"
 
 using namespace cv;
 using namespace std;
 
-//int main(int argc, const char * argv[]) {
-//   return 0;
-//}
-//
 int main(int argc, const char *argv[])
 {
    CliParser parser(argc, argv);
@@ -69,7 +60,6 @@ int main(int argc, const char *argv[])
 
   // Closes all the frames
   destroyAllWindows();
-	
   return 0;
 }
 // END OF PROGRAM
