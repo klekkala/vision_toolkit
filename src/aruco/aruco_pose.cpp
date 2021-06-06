@@ -11,22 +11,45 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
-//#include <opencv2/opencv.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/foreach.hpp>
+#define foreach BOOST_FOREACH
 
+// ROS includes
+#include <ros/ros.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <rosbag/bag.h>
+#include <rosbag/view.h>
+#include <std_msgs/Int32.h>
+#include <std_msgs/String.h>
 
 #include "common/CliParser.h"
 
 using namespace cv;
 using namespace std;
+using rosbag::Bag;
 
 int main(int argc, const char *argv[])
 {
-   CliParser parser(argc, argv);
-   parser.AddArgument("input,i", "Input mp4 file");
-   parser.Parse();
+  CliParser parser(argc, argv);
+  parser.AddArgument("input,i", "Input mp4 file");
+  parser.Parse();
 
+  Bag bag;
+  bag.open(parser.GetArgument("i"), rosbag::bagmode::Read);
+
+  rosbag::View view(bag);
+
+  foreach(rosbag::MessageInstance const m, view) {
+    std_msgs::String::ConstPtr s = m.instantiate<std_msgs::String>();
+    if (s!=NULL) {
+      cout << s->data << endl;
+    }
+  }
+
+   /*
    VideoCapture cap(parser.GetArgument("i"));
    cout << parser.GetArgument("i") << endl;
 
@@ -60,6 +83,8 @@ int main(int argc, const char *argv[])
 
   // Closes all the frames
   destroyAllWindows();
+  */
+
+  bag.close();
   return 0;
 }
-// END OF PROGRAM
