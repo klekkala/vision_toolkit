@@ -22,8 +22,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
-#include <std_msgs/Int32.h>
-#include <std_msgs/String.h>
+#include <sensor_msgs/image_encodings.h>
 
 #include "common/CliParser.h"
 
@@ -34,20 +33,30 @@ using rosbag::Bag;
 int main(int argc, const char *argv[])
 {
   CliParser parser(argc, argv);
-  parser.AddArgument("input,i", "Input mp4 file");
+  parser.AddArgument("input,i", "Input rosbag file");
+  parser.AddArgument("output,o", "Output video file");
   parser.Parse();
 
+  // Initialize bag and open for reading
   Bag bag;
   bag.open(parser.GetArgument("i"), rosbag::bagmode::Read);
 
   rosbag::View view(bag);
+  cout << view.size() << endl;
 
+  // Initialize cv::bridge pointer... TODO: Verify if this is needed
+  cv_bridge::CvImagePtr cv_ptr;
+
+  
+  // Iterate over messages in bag and convert to OpenCV image. Add to video writer
+  //VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15);
+  //VideoWriter writer();
   foreach(rosbag::MessageInstance const m, view) {
-    std_msgs::String::ConstPtr s = m.instantiate<std_msgs::String>();
-    if (s!=NULL) {
-      cout << s->data << endl;
-    }
+    auto img_msg_ptr = m.instantiate<sensor_msgs::Image>();
+    cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
+
   }
+
 
    /*
    VideoCapture cap(parser.GetArgument("i"));
