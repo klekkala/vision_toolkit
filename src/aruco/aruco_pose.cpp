@@ -51,48 +51,23 @@ int main(int argc, const char *argv[])
   // Iterate over messages in bag and convert to OpenCV image. Add to video writer
   //VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15);
   //VideoWriter writer();
+  // TODO: This is temp hack code to get some aruco markers to show. Don't need video shenanigans 
+  std::vector<cv::Mat> imgs;
   foreach(rosbag::MessageInstance const m, view) {
     auto img_msg_ptr = m.instantiate<sensor_msgs::Image>();
     cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
-
+    imgs.emplace_back(img);
+  }
+  
+  if (imgs.empty()) {
+    return EXIT_FAILURE;
   }
 
-
-   /*
-   VideoCapture cap(parser.GetArgument("i"));
-   cout << parser.GetArgument("i") << endl;
-
-  // Check if camera opened successfully
-  if(!cap.isOpened()){
-    cout << "Error opening video stream or file" << endl;
-    return -1;
+  VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15, imgs[0].size());
+  for (const auto& img : imgs) {
+    writer.write(img);
   }
-	
-  while(1){
-
-    Mat frame;
-    // Capture frame-by-frame
-    cap >> frame;
- 
-    // If the frame is empty, break immediately
-    if (frame.empty())
-      break;
-
-    // Display the resulting frame
-    imshow( "Frame", frame );
-
-    // Press  ESC on keyboard to exit
-    char c=(char)waitKey(25);
-    if(c==27)
-      break;
-  }
- 
-  // When everything done, release the video capture object
-  cap.release();
-
-  // Closes all the frames
-  destroyAllWindows();
-  */
+  writer.release();
 
   bag.close();
   return 0;
