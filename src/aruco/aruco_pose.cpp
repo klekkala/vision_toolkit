@@ -23,18 +23,20 @@
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_msgs/UInt32MultiArray.h>
 
 #include "common/CliParser.h"
 
 using namespace cv;
 using namespace std;
 using rosbag::Bag;
+using boost::filesystem::path;
 
 int main(int argc, const char *argv[])
 {
   CliParser parser(argc, argv);
   parser.AddArgument("input,i", "Input rosbag file");
-  parser.AddArgument("output,o", "Output video file");
+  parser.AddArgument("output,o", "Output file. Rosbag if .bag, video otherwise");
   parser.Parse();
 
   // Initialize bag and open for reading
@@ -42,32 +44,68 @@ int main(int argc, const char *argv[])
   bag.open(parser.GetArgument("i"), rosbag::bagmode::Read);
 
   rosbag::View view(bag);
-  cout << view.size() << endl;
 
   // Initialize cv::bridge pointer... TODO: Verify if this is needed
   cv_bridge::CvImagePtr cv_ptr;
 
-  
-  // Iterate over messages in bag and convert to OpenCV image. Add to video writer
-  //VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15);
-  //VideoWriter writer();
-  // TODO: This is temp hack code to get some aruco markers to show. Don't need video shenanigans 
-  std::vector<cv::Mat> imgs;
-  foreach(rosbag::MessageInstance const m, view) {
-    auto img_msg_ptr = m.instantiate<sensor_msgs::Image>();
-    cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
-    imgs.emplace_back(img);
-  }
-  
-  if (imgs.empty()) {
-    return EXIT_FAILURE;
-  }
+  // Basic Aruco detection stuffs
+  std::vector<int32_t> markerIds;
+  std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
+  cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
+  cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
 
-  VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15, imgs[0].size());
-  for (const auto& img : imgs) {
-    writer.write(img);
+  // TODO: Set up for pose estimation. (https://docs.opencv.org/4.2.0/d5/dae/tutorial_aruco_detection.html)
+
+  // Iterate over messages in bag and convert to OpenCV image. Add to appropriate output stream
+  // TODO: Figure out rosbag write...
+  rosbag::Bag out;
+  if (path(parser.GetArgument("o")).extension() == ".bag") {
+    out.open(parser.GetArgument("o"), rosbag::bagmode::Write);
+    std_msgs::UInt32MultiArray ros_arr;
+    ros::Time::init();
+    ros_arr.layout.dim.emplace_back(std_msgs::MultiArrayDimension());
+    cout << ros_arr.layout.dim.size() << endl;
+
+    foreach(rosbag::MessageInstance const m, view) {
+      auto img_msg_ptr = m.instantiate<sensor_msgs::Image>();
+      cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
+      cv::aruco::detectMarkers(img, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
+
+      ros_arr.data.clear();
+      ros_arr.data.insert(ros_arr.data.end(), markerIds.begin(), markerIds.end());
+      out.write("markerIds", ros::Time::now(), ros_arr);
+
+      markerIds.clear();
+      markerCorners.clear();
+      rejectedCandidates.clear();
+    }
+  } else {
+    std::vector<cv::Mat> imgs;
+    foreach(rosbag::MessageInstance const m, view) {
+      auto img_msg_ptr = m.instantiate<sensor_msgs::Image>();
+      cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
+      cv::aruco::detectMarkers(img, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
+
+      if (!markerIds.empty()) {
+        cv::aruco::drawDetectedMarkers(img, markerCorners, markerIds);
+      }
+      imgs.emplace_back(img);
+
+      markerIds.clear();
+      markerCorners.clear();
+      rejectedCandidates.clear();
+    }
+    
+    if (imgs.empty()) {
+      return EXIT_FAILURE;
+    }
+
+    VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15, imgs[0].size());
+    for (const auto& img : imgs) {
+      writer.write(img);
+    }
+    writer.release();
   }
-  writer.release();
 
   bag.close();
   return 0;
