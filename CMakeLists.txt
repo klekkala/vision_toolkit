@@ -19,11 +19,18 @@ find_package( catkin REQUIRED
         image_transport
         rosbag
 )
+find_package(PCL 1.10 REQUIRED
+  COMPONENTS
+    common
+    tracking
+    filters
+)
 
 include_directories( 
    ${OpenCV_INCLUDE_DIRS} 
    ${Boost_INCLUDE_DIRS}
    ${catkin_INCLUDE_DIRS}
+   ${PCL_INCLUDE_DIRS}
 )
 
 add_subdirectory(src)

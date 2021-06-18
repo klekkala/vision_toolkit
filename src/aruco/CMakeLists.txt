@@ -7,4 +7,5 @@ target_link_libraries( ${ProgramName} LINK_PUBLIC
    ${Boost_LIBRARIES}
    3dobj_tracking_common
    ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
 )
