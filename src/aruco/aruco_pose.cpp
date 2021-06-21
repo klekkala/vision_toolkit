@@ -32,6 +32,46 @@ using namespace std;
 using rosbag::Bag;
 using boost::filesystem::path;
 
+typedef std::vector<std::vector<cv::Point2f>> opencv_aruco_2d_pts_t;
+
+/** Detects aruco markers
+ *
+ * \param[in] bag
+ * \param[in] parameters
+ * \param[in] dictionary
+ * \param[out] marker_ids
+ * \param[out] marker_corners
+ * \param[out] rejected_candidates
+ * \param[out] imgs
+ */
+void DetectAruco(const Bag& bag, const cv::Ptr<cv::aruco::DetectorParameters>& parameters, const cv::Ptr<cv::aruco::Dictionary>& dictionary,
+                 std::vector<std::vector<int32_t>>& marker_ids, std::vector<opencv_aruco_2d_pts_t>& marker_corners, 
+                 std::vector<opencv_aruco_2d_pts_t>& rejected_candidates, std::vector<cv::Mat>& imgs) {
+  cout << "Detecting aruco markers..." << endl;
+  rosbag::View view(bag);
+  std::vector<int32_t> ids;
+  opencv_aruco_2d_pts_t corners, rejected;
+
+  foreach(rosbag::MessageInstance const m, view) {
+    auto img_msg_ptr = m.instantiate<sensor_msgs::Image>();
+    cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
+    cv::aruco::detectMarkers(img, dictionary, corners, ids, parameters, rejected);
+
+    if (!ids.empty()) {
+      cv::aruco::drawDetectedMarkers(img, corners, ids);
+    }
+
+    imgs.emplace_back(img);
+    marker_ids.emplace_back(ids);
+    marker_corners.emplace_back(corners);
+    rejected_candidates.emplace_back(rejected);
+
+    ids.clear();
+    corners.clear();
+    rejected.clear();
+  }
+}
+
 int main(int argc, const char *argv[])
 {
   CliParser parser(argc, argv);
@@ -45,67 +85,28 @@ int main(int argc, const char *argv[])
 
   rosbag::View view(bag);
 
-  // Initialize cv::bridge pointer... TODO: Verify if this is needed
-  cv_bridge::CvImagePtr cv_ptr;
-
-  // Basic Aruco detection stuffs
-  std::vector<int32_t> markerIds;
-  std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
-  cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
-  cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
-
   // TODO: Set up for pose estimation. (https://docs.opencv.org/4.2.0/d5/dae/tutorial_aruco_detection.html)
 
-  // Iterate over messages in bag and convert to OpenCV image. Add to appropriate output stream
   // TODO: Figure out rosbag write...
-  rosbag::Bag out;
-  if (path(parser.GetArgument("o")).extension() == ".bag") {
-    out.open(parser.GetArgument("o"), rosbag::bagmode::Write);
-    std_msgs::UInt32MultiArray ros_arr;
-    ros::Time::init();
-    ros_arr.layout.dim.emplace_back(std_msgs::MultiArrayDimension());
-    cout << ros_arr.layout.dim.size() << endl;
+  // Basic Aruco detection stuffs
+  cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
+  cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
+  std::vector<std::vector<int32_t>> marker_ids;
+  std::vector<opencv_aruco_2d_pts_t> marker_corners, rejected_candidates;
+  std::vector<cv::Mat> imgs;
 
-    foreach(rosbag::MessageInstance const m, view) {
-      auto img_msg_ptr = m.instantiate<sensor_msgs::Image>();
-      cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
-      cv::aruco::detectMarkers(img, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
-
-      ros_arr.data.clear();
-      ros_arr.data.insert(ros_arr.data.end(), markerIds.begin(), markerIds.end());
-      out.write("markerIds", ros::Time::now(), ros_arr);
-
-      markerIds.clear();
-      markerCorners.clear();
-      rejectedCandidates.clear();
-    }
-  } else {
-    std::vector<cv::Mat> imgs;
-    foreach(rosbag::MessageInstance const m, view) {
-      auto img_msg_ptr = m.instantiate<sensor_msgs::Image>();
-      cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
-      cv::aruco::detectMarkers(img, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
-
-      if (!markerIds.empty()) {
-        cv::aruco::drawDetectedMarkers(img, markerCorners, markerIds);
-      }
-      imgs.emplace_back(img);
-
-      markerIds.clear();
-      markerCorners.clear();
-      rejectedCandidates.clear();
-    }
-    
-    if (imgs.empty()) {
-      return EXIT_FAILURE;
-    }
-
-    VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15, imgs[0].size());
-    for (const auto& img : imgs) {
-      writer.write(img);
-    }
-    writer.release();
+  DetectAruco(bag, parameters, dictionary, marker_ids, marker_corners, rejected_candidates, imgs);
+  
+  if (imgs.empty()) {
+    return EXIT_FAILURE;
   }
+
+  cout << "Writing video out..." << endl;
+  VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15, imgs[0].size());
+  for (const auto& img : imgs) {
+    writer.write(img);
+  }
+  writer.release();
 
   bag.close();
   return 0;
