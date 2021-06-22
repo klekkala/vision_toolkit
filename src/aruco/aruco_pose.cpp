@@ -36,13 +36,13 @@ typedef std::vector<std::vector<cv::Point2f>> opencv_aruco_2d_pts_t;
 
 /** Detects aruco markers
  *
- * \param[in] bag
- * \param[in] parameters
- * \param[in] dictionary
- * \param[out] marker_ids
- * \param[out] marker_corners
- * \param[out] rejected_candidates
- * \param[out] imgs
+ * \param[in] bag                   ROSbag to read from
+ * \param[in] parameters            Aruco detector parameters
+ * \param[in] dictionary            Marker dictionary to use
+ * \param[out] marker_ids           Marker IDs
+ * \param[out] marker_corners       Marker corners
+ * \param[out] rejected_candidates  Rejected candidate corners
+ * \param[out] imgs                 Output images with aruco markers drawn
  */
 void DetectAruco(const Bag& bag, const cv::Ptr<cv::aruco::DetectorParameters>& parameters, const cv::Ptr<cv::aruco::Dictionary>& dictionary,
                  std::vector<std::vector<int32_t>>& marker_ids, std::vector<opencv_aruco_2d_pts_t>& marker_corners, 
@@ -64,6 +64,13 @@ void DetectAruco(const Bag& bag, const cv::Ptr<cv::aruco::DetectorParameters>& p
       }
     }
 
+    // Debug: Draw rejected candidates
+    for (const auto& marker_corners : rejected) {
+      for (const auto& corner : marker_corners) {
+        cv::circle(img, corner, 7, cv::Scalar(0, 0, 255), -1);
+      }
+    }
+
     if (!ids.empty()) {
       cv::aruco::drawDetectedMarkers(img, corners, ids);
     }
@@ -71,12 +78,16 @@ void DetectAruco(const Bag& bag, const cv::Ptr<cv::aruco::DetectorParameters>& p
     imgs.emplace_back(img);
     marker_ids.emplace_back(ids);
     marker_corners.emplace_back(corners);
-    rejected_candidates.emplace_back(rejected);
+    if (!rejected.empty()) {
+      rejected_candidates.emplace_back(rejected);
+    }
 
     ids.clear();
     corners.clear();
     rejected.clear();
   }
+
+  cout << "Rejected corners?: " << marker_corners.empty() ? "0\n" : "1\n";
 }
 
 int main(int argc, const char *argv[])
