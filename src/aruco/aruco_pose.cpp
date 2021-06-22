@@ -57,6 +57,13 @@ void DetectAruco(const Bag& bag, const cv::Ptr<cv::aruco::DetectorParameters>& p
     cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
     cv::aruco::detectMarkers(img, dictionary, corners, ids, parameters, rejected);
 
+    // Debug: Draw all corner circles
+    for (const auto& marker_corners : corners) {
+      for (const auto& corner : marker_corners) {
+        cv::circle(img, corner, 7, cv::Scalar(0, 255, 0), -1);
+      }
+    }
+
     if (!ids.empty()) {
       cv::aruco::drawDetectedMarkers(img, corners, ids);
     }
