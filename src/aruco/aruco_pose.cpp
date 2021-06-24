@@ -11,6 +11,8 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+//#include <opencv2/tracking/tracker.hpp>
+#include <opencv2/tracking.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
@@ -102,6 +104,17 @@ void DetectAruco(const Bag& bag,
   }
 }
 
+cv::Rect RectBBOXFromPts(const std::vector<cv::Point2f>& pts) {
+  float tl_x=pts[0].x, tl_y=pts[0].y, br_x=0., br_y=0., w, h;
+  for (const auto& pt : pts) {
+    tl_x = min(pt.x, tl_x);
+    tl_y = min(pt.y, tl_y);
+    br_x = max(pt.x, br_x);
+    br_y = max(pt.y, br_y);
+  }
+  return cv::Rect(tl_x, tl_y, br_x - tl_x, br_y - tl_y);
+}
+
 int main(int argc, const char *argv[])
 {
   CliParser parser(argc, argv);
@@ -154,6 +167,13 @@ int main(int argc, const char *argv[])
   if (imgs.empty()) {
     return EXIT_FAILURE;
   }
+
+  // Create tracker
+  Ptr<Tracker> tracker = TrackerKCF::create();
+  TrackerSamplerPF::Params PFparams;
+  //Ptr<TrackerSamplerAlgorithm> sampler = TrackerSamplerPF::create(PFparams);
+  //Ptr<TrackerSamplerAlgorithm> sampler = new TrackerSamplerPF(PFparams);
+  //if (!tracker->sampler->addTrackSamplerAlgorithm(
 
   cout << "Writing video out..." << endl;
   VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15, imgs[0].size());
