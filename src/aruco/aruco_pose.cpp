@@ -7,6 +7,7 @@
  */
 
 #include <iostream>
+#include <unordered_map>
 
 #include <opencv2/aruco.hpp>
 #include <opencv2/imgproc.hpp>
@@ -36,6 +37,19 @@ using boost::filesystem::path;
 
 typedef std::vector<std::vector<cv::Point2f>> opencv_aruco_2d_pts_t;
 
+typedef struct MarkerData {
+  std::vector<cv::Point2f> corners;
+  cv::Vec3d rvecs, tvecs;
+} MarkerData;
+
+typedef struct ObsData {
+  std::unordered_map<int32_t, struct MarkerData*> id_to_data;
+  std::vector<opencv_aruco_2d_pts_t> rejected_candidates;
+} ObsData;
+
+//typedef std::unordered_map<int32_t, size_t> marker_id_to_frame_id_t;
+typedef std::unordered_map<size_t, struct ObsData*> frame_to_obs_t;
+
 /** Detects aruco markers
  *
  * \param[in] bag                   ROSbag to read from
@@ -49,9 +63,7 @@ typedef std::vector<std::vector<cv::Point2f>> opencv_aruco_2d_pts_t;
 void DetectAruco(const Bag& bag, 
                  const cv::Ptr<cv::aruco::DetectorParameters>& parameters,
                  const cv::Ptr<cv::aruco::Dictionary>& dictionary,
-                 std::vector<std::vector<int32_t>>& marker_ids, 
-                 std::vector<opencv_aruco_2d_pts_t>& marker_corners, 
-                 std::vector<opencv_aruco_2d_pts_t>& rejected_candidates, 
+                 frame_to_obs_t& frame_to_obs,
                  cv::Mat& cam_mat,
                  cv::Mat& dst_mat,
                  std::vector<cv::Mat>& imgs) {
@@ -60,7 +72,9 @@ void DetectAruco(const Bag& bag,
   std::vector<int32_t> ids;
   opencv_aruco_2d_pts_t corners, rejected;
 
+  size_t frame_id = 0;
   foreach(rosbag::MessageInstance const m, view) {
+    struct ObsData* obs_data = new ObsData();
     auto img_msg_ptr = m.instantiate<sensor_msgs::Image>();
     cv::Mat img = cv_bridge::toCvCopy(img_msg_ptr)->image;
     cv::aruco::detectMarkers(img, dictionary, corners, ids, parameters, rejected,
@@ -93,17 +107,45 @@ void DetectAruco(const Bag& bag,
       cv::aruco::drawAxis(img, cam_mat, dst_mat, rvecs[i], tvecs[i], 0.1);
     }
 
-    imgs.emplace_back(img);
-    marker_ids.emplace_back(ids);
-    marker_corners.emplace_back(corners);
-    rejected_candidates.emplace_back(rejected);
+    // Create tracker
+    /*
+    Ptr<Tracker> tracker = TrackerKCF::create();
+    TrackerSamplerPF::Params PFparams;
+    for (const auto& marker_id : marker_ids[0]) {
+      cout << "ID: " << marker_id << endl;
+    }
+    auto rect = RectBBOXFromPts(marker_corners[0][0]);
+    Ptr<TrackerSamplerAlgorithm> sampler = new TrackerSamplerPF(rect, PFparams);
+    //if (!tracker->sampler->addTrackSamplerAlgorithm(
+    */
 
+    // Save pertinent data
+    imgs.emplace_back(img);
+    for (int i = 0; i < rvecs.size(); ++i) {
+      struct MarkerData* marker_data = new MarkerData();
+      marker_data->corners = corners[i];
+      marker_data->tvecs = tvecs[i];
+      marker_data->rvecs = rvecs[i];
+      obs_data->id_to_data.emplace(ids[i], marker_data);
+    } 
+    obs_data->rejected_candidates.emplace_back(rejected);
+    frame_to_obs.emplace(frame_id, obs_data);
+
+    // Clear vectors for next iteration
     ids.clear();
     corners.clear();
     rejected.clear();
+
+    ++frame_id;
   }
 }
 
+/** Generate a cv::Rect bounding box for aruco marker corners
+ *
+ * \param[in] pts   Points to generate bounding box for
+ *
+ * \returns         Rect object bounding box
+ */
 cv::Rect RectBBOXFromPts(const std::vector<cv::Point2f>& pts) {
   float tl_x=pts[0].x, tl_y=pts[0].y, br_x=0., br_y=0., w, h;
   for (const auto& pt : pts) {
@@ -157,23 +199,14 @@ int main(int argc, const char *argv[])
   // Basic Aruco detection stuffs
   cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
   cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
-  std::vector<std::vector<int32_t>> marker_ids;
-  std::vector<opencv_aruco_2d_pts_t> marker_corners, rejected_candidates;
+  frame_to_obs_t frame_to_obs;
   std::vector<cv::Mat> imgs;
 
-  DetectAruco(bag, parameters, dictionary, marker_ids, marker_corners,
-              rejected_candidates, cam_mat, dst_mat, imgs);
+  DetectAruco(bag, parameters, dictionary, frame_to_obs, cam_mat, dst_mat, imgs);
   
   if (imgs.empty()) {
     return EXIT_FAILURE;
   }
-
-  // Create tracker
-  Ptr<Tracker> tracker = TrackerKCF::create();
-  TrackerSamplerPF::Params PFparams;
-  //Ptr<TrackerSamplerAlgorithm> sampler = TrackerSamplerPF::create(PFparams);
-  //Ptr<TrackerSamplerAlgorithm> sampler = new TrackerSamplerPF(PFparams);
-  //if (!tracker->sampler->addTrackSamplerAlgorithm(
 
   cout << "Writing video out..." << endl;
   VideoWriter writer(parser.GetArgument("o"), VideoWriter::fourcc('M', 'J', 'P', 'G'), 15, imgs[0].size());
