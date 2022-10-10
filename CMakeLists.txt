@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(3dobject_tracking)
+project(vision_toolkit)
 
 find_package( OpenCV 4.2.0 REQUIRED )
 find_package( Boost 
@@ -10,6 +10,8 @@ find_package( Boost
 
    REQUIRED
 )
+find_package(realsense2 REQUIRED)
+
 find_package( catkin REQUIRED
     COMPONENTS
         roscpp
@@ -26,6 +28,11 @@ find_package(PCL 1.10 REQUIRED
     filters
 )
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
+
 include_directories( 
    ${OpenCV_INCLUDE_DIRS} 
    ${Boost_INCLUDE_DIRS}
@@ -33,5 +40,9 @@ include_directories(
    ${PCL_INCLUDE_DIRS}
 )
 
-add_subdirectory(src)
-add_subdirectory(include)
+#add_subdirectory(src)
+#add_subdirectory(include)
+
+add_executable(${PROJECT_NAME} src/multirs/multi_rs.cpp)
+target_link_libraries(${PROJECT_NAME} ${realsense2_LIBRARY})
+
