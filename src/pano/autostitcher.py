@@ -117,7 +117,8 @@ for i in range(0, len(images)):
     #cv2.waitKey(0)
 
 
-# STITCH IMAGES
+# BLEND (using laplacian pyramids)
+"""
 # Generate Laplacian pyramids for each image
 lps = []
 print("Original size:", dst[0].shape)
@@ -166,18 +167,34 @@ for i in range(1, 6):
                                 testReconstruct)
 print(testReconstruct.shape)
 cv2.imwrite("test.png", testReconstruct[:, :, ::-1])
-
 """
+
+
+# BLEND (using exponential value averaging)
+shifts = [1140, 1010, 1110, 1170]
+blendedDst = []
+for i in range(0, len(dst) - 1):
+    # Fade in the next image based on column number
+    temp = dst[i].copy()
+    for col in range(w):
+        if col < shifts[i]:
+            continue
+        else:
+            alpha = (col - shifts[i]) / (1280 - shifts[i])
+            newCol = (temp[:, col, :] * (1.0 - alpha)) + \
+                        (dst[i + 1][:, col - shifts[i], :] * (alpha))
+            temp[:, col, :] = newCol
+    blendedDst.append(temp)
+blendedDst.append(dst[-1])
+
+
+# STITCH IMAGES
 panorama = Image.new("RGB", size=(5710, h), color=(0, 0, 0))
 # Shifts each image over the right amount
-shifts = [(0, 0), (1140, 0), (2150, 0), (3260, 0), (4430, 0)]
+newShifts = [(0, 0), (1140, 0), (2150, 0), (3260, 0), (4430, 0)]
 # Adds each image to panorama cameras starting from the outside images
-for i in range(4, 2, -1):
-    insertImg = Image.fromarray(cv2.cvtColor(dst[i], cv2.COLOR_BGR2RGB))
-    panorama.paste(insertImg, shifts[i])
-for i in range(0, 3):
-    insertImg = Image.fromarray(cv2.cvtColor(dst[i], cv2.COLOR_BGR2RGB))
-    panorama.paste(insertImg, shifts[i])
+for i in range(len(blendedDst) - 1, -1, -1):
+    insertImg = Image.fromarray(cv2.cvtColor(blendedDst[i], cv2.COLOR_BGR2RGB))
+    panorama.paste(insertImg, newShifts[i])
 
 panorama.save("testpanorama.png")
-"""
