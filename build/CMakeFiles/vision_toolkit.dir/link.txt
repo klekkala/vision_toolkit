@@ -1,1 +1,0 @@
-/usr/bin/c++   -pthread   CMakeFiles/vision_toolkit.dir/src/multirs/multi_rs.cpp.o  -o vision_toolkit  -Wl,-rpath,/opt/ros/noetic/lib/x86_64-linux-gnu /opt/ros/noetic/lib/x86_64-linux-gnu/librealsense2.so.2.48.0 
