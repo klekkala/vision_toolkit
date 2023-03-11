@@ -11,14 +11,13 @@ find_package( Boost
    REQUIRED
 )
 
-find_package( catkin REQUIRED
+find_package( rosbag REQUIRED
     COMPONENTS
-        roscpp
+    	roscpp
         cv_bridge
         sensor_msgs
         std_msgs
         image_transport
-        rosbag
 )
 find_package(PCL 1.10 REQUIRED
   COMPONENTS
@@ -38,3 +37,19 @@ include_directories(
    ${PCL_INCLUDE_DIRS}
 )
 
+add_executable(bag_reader
+        src/rosutils/bag_reader.cpp
+)
+
+target_include_directories(bag_reader
+    PUBLIC
+        include
+        ${rosbag_INCLUDE_DIRS}
+)
+
+target_link_libraries(bag_reader
+    PRIVATE
+        ${rosbag_LIBRARIES}
+        ${OpenCV_LIBS}
+        stdc++fs
+)
