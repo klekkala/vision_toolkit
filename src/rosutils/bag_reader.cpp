@@ -101,17 +101,20 @@ int main() {
 	int minLen = *min_element(allFrames.begin(), allFrames.end());
 
 	// Remove frames from bags
-	rosbag::Bag newbag1, newbag2, newbag3, newbag4, newbag5;
+	//rosbag::Bag newbag1, newbag2, newbag3, newbag4, newbag5;
+	rosbag::Bag mergebag;
+	ros::Time::init();
 
 	// Write to newcam1 file
 	bag1.open("cam1.bag");
-	newbag1.open("newcam1.bag");
+	//newbag1.open("newcam1.bag", rosbag::bagmode::Write);
+	mergebag.open("merged.bag", rosbag::bagmode::Write);
 	int count = 0;
         rosbag::View view1a(bag1, rosbag::TopicQuery(colorTopic1));
         foreach (rosbag::MessageInstance const m, view1a) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag1.write("/cam_1/color/image_raw",
+                        mergebag.write("/cam_1/color/image_raw",
 					ros::Time::now(), *i);
 			count++;
                 }
@@ -121,7 +124,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view1b) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag1.write("/cam_1/depth/image_rect_raw",
+                        mergebag.write("/cam_1/depth/image_rect_raw",
                                         ros::Time::now(), *i);
                         count++;
                 }
@@ -135,7 +138,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view1c) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag1.write("/cam_1/color/metadata",
+                        mergebag.write("/cam_1/color/metadata",
                                         ros::Time::now(), *i);
                 }
         }
@@ -143,21 +146,21 @@ int main() {
         foreach (rosbag::MessageInstance const m, view1d) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag1.write("/cam_1/depth/metadata",
+                        mergebag.write("/cam_1/depth/metadata",
                                         ros::Time::now(), *i);
                 }
         }
         bag1.close();
-	newbag1.close();
+	//newbag1.close();
 
 	// Write to newcam2 file
         bag2.open("cam2.bag");
-        newbag2.open("newcam2.bag");
+        //newbag2.open("newcam2.bag", rosbag::bagmode::Write);
         rosbag::View view2a(bag2, rosbag::TopicQuery(colorTopic2));
         foreach (rosbag::MessageInstance const m, view2a) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag2.write("/cam_2/color/image_raw",
+                        mergebag.write("/cam_2/color/image_raw",
                                         ros::Time::now(), *i);
                         count++;
                 }
@@ -167,7 +170,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view2b) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag2.write("/cam_2/depth/image_rect_raw",
+                        mergebag.write("/cam_2/depth/image_rect_raw",
                                         ros::Time::now(), *i);
                         count++;
                 }
@@ -181,7 +184,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view2c) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag2.write("/cam_2/color/metadata",
+                        mergebag.write("/cam_2/color/metadata",
                                         ros::Time::now(), *i);
                 }
         }
@@ -189,21 +192,21 @@ int main() {
         foreach (rosbag::MessageInstance const m, view2d) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag2.write("/cam_2/depth/metadata",
+                        mergebag.write("/cam_2/depth/metadata",
                                         ros::Time::now(), *i);
                 }
         }
         bag2.close();
-        newbag2.close();
+        //newbag2.close();
 
 	// Write to newcam3 file
         bag3.open("cam3.bag");
-        newbag3.open("newcam3.bag");
+        //newbag3.open("newcam3.bag", rosbag::bagmode::Write);
         rosbag::View view3a(bag3, rosbag::TopicQuery(colorTopic3));
         foreach (rosbag::MessageInstance const m, view3a) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag3.write("/cam_3/color/image_raw",
+                        mergebag.write("/cam_3/color/image_raw",
                                         ros::Time::now(), *i);
                         count++;
                 }
@@ -213,7 +216,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view3b) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag3.write("/cam_3/depth/image_rect_raw",
+                        mergebag.write("/cam_3/depth/image_rect_raw",
                                         ros::Time::now(), *i);
                         count++;
                 }
@@ -227,7 +230,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view3c) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag3.write("/cam_3/color/metadata",
+                        mergebag.write("/cam_3/color/metadata",
                                         ros::Time::now(), *i);
                 }
         }
@@ -235,21 +238,21 @@ int main() {
         foreach (rosbag::MessageInstance const m, view3d) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag3.write("/cam_3/depth/metadata",
+                        mergebag.write("/cam_3/depth/metadata",
                                         ros::Time::now(), *i);
                 }
         }
         bag3.close();
-        newbag3.close();
+        //newbag3.close();
 
 	// Write to newcam4 file
         bag4.open("cam4.bag");
-        newbag4.open("newcam4.bag");
+        //newbag4.open("newcam4.bag", rosbag::bagmode::Write);
         rosbag::View view4a(bag4, rosbag::TopicQuery(colorTopic4));
         foreach (rosbag::MessageInstance const m, view4a) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag4.write("/cam_4/color/image_raw",
+                        mergebag.write("/cam_4/color/image_raw",
                                         ros::Time::now(), *i);
                         count++;
                 }
@@ -259,7 +262,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view4b) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag4.write("/cam_4/depth/image_rect_raw",
+                        mergebag.write("/cam_4/depth/image_rect_raw",
                                         ros::Time::now(), *i);
                         count++;
                 }
@@ -273,7 +276,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view4c) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag4.write("/cam_4/color/metadata",
+			mergebag.write("/cam_4/color/metadata",
                                         ros::Time::now(), *i);
                 }
         }
@@ -281,21 +284,21 @@ int main() {
         foreach (rosbag::MessageInstance const m, view4d) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag4.write("/cam_4/depth/metadata",
+                        mergebag.write("/cam_4/depth/metadata",
                                         ros::Time::now(), *i);
                 }
         }
         bag4.close();
-        newbag4.close();
+        //newbag4.close();
 
 	// Write to newcam5 file
         bag5.open("cam5.bag");
-        newbag5.open("newcam5.bag");
+        //newbag5.open("newcam5.bag", rosbag::bagmode::Write);
         rosbag::View view5a(bag5, rosbag::TopicQuery(colorTopic5));
         foreach (rosbag::MessageInstance const m, view5a) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag5.write("/cam_5/color/image_raw",
+                        mergebag.write("/cam_5/color/image_raw",
                                         ros::Time::now(), *i);
                         count++;
                 }
@@ -305,7 +308,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view5b) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL && count < minLen) {
-                        newbag5.write("/cam_5/depth/image_rect_raw",
+                        mergebag.write("/cam_5/depth/image_rect_raw",
                                         ros::Time::now(), *i);
                         count++;
                 }
@@ -319,7 +322,7 @@ int main() {
         foreach (rosbag::MessageInstance const m, view5c) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag5.write("/cam_5/color/metadata",
+                        mergebag.write("/cam_5/color/metadata",
                                         ros::Time::now(), *i);
                 }
         }
@@ -327,10 +330,11 @@ int main() {
         foreach (rosbag::MessageInstance const m, view5d) {
                 sensor_msgs::ImageConstPtr i=m.instantiate<sensor_msgs::Image>();
                 if (i != NULL) {
-                        newbag5.write("/cam_5/depth/metadata",
+                        mergebag.write("/cam_5/depth/metadata",
                                         ros::Time::now(), *i);
                 }
         }
         bag5.close();
-        newbag5.close();
+        //newbag5.close();
+	mergebag.close();
 }
