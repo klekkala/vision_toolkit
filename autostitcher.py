@@ -1,5 +1,5 @@
 # Stitches 5 images from the RL project into a panorama
-# Image order: 1, 4, 3, 5, 2
+# Image order: 5, 3, 4, 2, 1
 
 import cv2
 import numpy as np
@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 def autostitch(filename="testpanorama.png"):
     #INPUT
     images = []
-    paths = ["hello/cam5.png", "hello/cam3.png", "hello/cam4.png", 
-             "hello/cam2.png", "hello/cam1.png"]
+    paths = ["cam5.png", "cam3.png", "cam4.png", 
+             "cam2.png", "cam1.png"]
     for path in paths:
         newImg = cv2.imread(path)
         images.append(newImg)
@@ -29,14 +29,14 @@ def autostitch(filename="testpanorama.png"):
     
     # Rotation and translation parameters for each image
     rotXval = 90
-    rotYval = [65, 67, 90, 100, 123]
+    rotYval = [69, 67, 90, 96, 113]
     rotZval = 90
-    distXval = [1618, 1575, 500, 40, -700]
+    distXval = [1568, 1575, 500, 0, -600]
     distYval = 500
     distZval = 500
     
     # Points used to transpose each rotated image to the flat 1280x720 canvas
-    srcPts = [[[500, 2], [500, 719], [1200, 559], [1200, 164]],
+    srcPts = [[[500, 0], [500, 704], [1200, 544], [1200, 150]],
               [[540, 0], [540, 720], [1188, 543], [1188, 180]],
               [],
               [[1, 98], [1, 625], [1092, 720], [1092, 0]],
@@ -173,7 +173,7 @@ def autostitch(filename="testpanorama.png"):
     
     
     # BLEND (using exponential value averaging)
-    shifts = [1140, 1010, 1110, 1170]
+    shifts = [1160, 1010, 1110, 900]
     blendedDst = []
     for i in range(0, len(dst) - 1):
         # Fade in the next image based on column number
@@ -191,9 +191,9 @@ def autostitch(filename="testpanorama.png"):
     
     
     # STITCH IMAGES
-    panorama = Image.new("RGB", size=(5710, h), color=(0, 0, 0))
+    panorama = Image.new("RGB", size=(5460, h), color=(0, 0, 0))
     # Shifts each image over the right amount
-    newShifts = [(0, 0), (1140, 0), (2150, 0), (3260, 0), (4430, 0)]
+    newShifts = [(0, 0), (1140, 0), (2150, 0), (3260, 0), (4230, 0)]
     # Adds each image to panorama cameras starting from the outside images
     for i in range(len(blendedDst) - 1, -1, -1):
         insertImg = Image.fromarray(cv2.cvtColor(blendedDst[i], cv2.COLOR_BGR2RGB))
