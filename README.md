@@ -39,3 +39,19 @@ The images are located in a directory named "hello" and are named "cam1.png", "c
 python autostitcher
 ```
 The resulting panorama is outputted with the default file name "testpanorama.png".
+
+# bag_reader
+Reads images from cam[1-5] bag files in the same directory, offsets the image stream of each so that they are of equal length, and merges them into a "merge.bag" file.
+
+When the executable is built, run the following command in the terminal:
+```
+./bag_reader
+```
+
+# bagstitch
+Reads "merged.bag" from the directory and stitches together every set of five images from the image streams (color and depth) using autostitcher.py. The panoramas are stored in the "hello" directory.
+
+Run the following command in the terminal:
+```
+python bagstitch.py
+```
