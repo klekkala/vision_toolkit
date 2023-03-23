@@ -48,6 +48,7 @@ def findNearestVal(row, col):
 image = cv2.imread("depthimg.png", 0)
 newImg = image.copy()
 
+# Go through each pixel and remove noise
 for i in range(image.shape[0]):
     for j in range(image.shape[1]):
         if image[i][j] == 0:
