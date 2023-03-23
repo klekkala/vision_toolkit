@@ -10,70 +10,70 @@ using namespace std;
 
 int main() {
 	// Initialize all variables
-	//vector<rosbag::Bag> bags = {rosbag::Bag(),rosbag::Bag(),rosbag::Bag(),
-	//	                    rosbag::Bag(), rosbag::Bag()};
 	rosbag::Bag bags;
 	vector<string> filenames = {"cam1.bag", "cam2.bag", "cam3.bag",
 		                    "cam4.bag", "cam5.bag"};
 
+	// All topics for cam1
 	vector<string> colorTopic1;
 	vector<string> depthTopic1;
 	vector<string> colorMeta1;
 	vector<string> depthMeta1;
-        colorTopic1.push_back(string("/cam_1/color/image_raw"));
-        depthTopic1.push_back(string("/cam_1/depth/image_rect_raw"));
+    colorTopic1.push_back(string("/cam_1/color/image_raw"));
+    depthTopic1.push_back(string("/cam_1/depth/image_rect_raw"));
 	colorMeta1.push_back(string("/cam_1/color/metadata"));
 	depthMeta1.push_back(string("/cam_1/depth/metadata"));
 
+	// All topics for cam2
 	vector<string> colorTopic2;
-        vector<string> depthTopic2;
+    vector<string> depthTopic2;
 	vector<string> colorMeta2;
-        vector<string> depthMeta2;
-        colorTopic2.push_back(string("/cam_2/color/image_raw"));
-        depthTopic2.push_back(string("/cam_2/depth/image_rect_raw"));
+    vector<string> depthMeta2;
+    colorTopic2.push_back(string("/cam_2/color/image_raw"));
+    depthTopic2.push_back(string("/cam_2/depth/image_rect_raw"));
 	colorMeta2.push_back(string("/cam_2/color/metadata"));
-        depthMeta2.push_back(string("/cam_2/depth/metadata"));
+    depthMeta2.push_back(string("/cam_2/depth/metadata"));
 
+    // All topics for cam3
 	vector<string> colorTopic3;
-        vector<string> depthTopic3;
+    vector<string> depthTopic3;
 	vector<string> colorMeta3;
-        vector<string> depthMeta3;
-        colorTopic3.push_back(string("/cam_3/color/image_raw"));
-        depthTopic3.push_back(string("/cam_3/depth/image_rect_raw"));
+    vector<string> depthMeta3;
+    colorTopic3.push_back(string("/cam_3/color/image_raw"));
+    depthTopic3.push_back(string("/cam_3/depth/image_rect_raw"));
 	colorMeta3.push_back(string("/cam_3/color/metadata"));
-        depthMeta3.push_back(string("/cam_3/depth/metadata"));
+    depthMeta3.push_back(string("/cam_3/depth/metadata"));
 
+    // All topics for cam4
 	vector<string> colorTopic4;
-        vector<string> depthTopic4;
+    vector<string> depthTopic4;
 	vector<string> colorMeta4;
-        vector<string> depthMeta4;
-        colorTopic4.push_back(string("/cam_4/color/image_raw"));
-        depthTopic4.push_back(string("/cam_4/depth/image_rect_raw"));
+    vector<string> depthMeta4;
+    colorTopic4.push_back(string("/cam_4/color/image_raw"));
+    depthTopic4.push_back(string("/cam_4/depth/image_rect_raw"));
 	colorMeta4.push_back(string("/cam_4/color/metadata"));
-        depthMeta4.push_back(string("/cam_4/depth/metadata"));
+    depthMeta4.push_back(string("/cam_4/depth/metadata"));
 
+    // All topics for cam5
 	vector<string> colorTopic5;
-        vector<string> depthTopic5;
+    vector<string> depthTopic5;
 	vector<string> colorMeta5;
-        vector<string> depthMeta5;
-        colorTopic5.push_back(string("/cam_5/color/image_raw"));
-        depthTopic5.push_back(string("/cam_5/depth/image_rect_raw"));
+    vector<string> depthMeta5;
+    colorTopic5.push_back(string("/cam_5/color/image_raw"));
+    depthTopic5.push_back(string("/cam_5/depth/image_rect_raw"));
 	colorMeta5.push_back(string("/cam_5/color/metadata"));
-        depthMeta5.push_back(string("/cam_5/depth/metadata"));
+    depthMeta5.push_back(string("/cam_5/depth/metadata"));
 
 	vector<vector<string>> colorTopics = {colorTopic1, colorTopic2,
-		                              colorTopic3, colorTopic4,
-					      colorTopic5};
+		                              colorTopic3, colorTopic4, colorTopic5};
 	vector<vector<string>> depthTopics = {depthTopic1, depthTopic2,
-		                              depthTopic3, depthTopic4,
-					      depthTopic5};
+		                              depthTopic3, depthTopic4, depthTopic5};
 	vector<vector<string>> colorMetas = {colorMeta1, colorMeta2,
-		                             colorMeta3, colorMeta4,
-					     colorMeta5};
+		                             colorMeta3, colorMeta4, colorMeta5};
 	vector<vector<string>> depthMetas = {depthMeta1, depthMeta2,
-		                             depthMeta3, depthMeta4,
-					     depthMeta5};
+		                             depthMeta3, depthMeta4, depthMeta5};
 
+	// Count of frames in each cam's image stream
 	vector<int> allFrames(5, 0);
 
 	// Read all cam files
