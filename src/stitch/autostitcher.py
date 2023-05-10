@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 def autostitch(filename="testpanorama.png"):
     #INPUT
     images = []
-    paths = ["cam5.png", "cam3.png", "cam4.png", 
-             "cam2.png", "cam1.png"]
+    paths = ["hello/cam5.png", "hello/cam3.png", "hello/cam4.png", 
+             "hello/cam2.png", "hello/cam1.png"]
     for path in paths:
         newImg = cv2.imread(path)
         images.append(newImg)
