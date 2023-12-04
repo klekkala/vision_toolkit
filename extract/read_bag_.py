@@ -24,6 +24,7 @@ for topic, msg, t in bag.read_messages(topics=[f'/cam{args.cam}/color/image_raw/
 	if args.frame is None:
                 np_arr = np.fromstring(msg.data, np.uint8)
                 cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+                print(save_path+'cam'+args.cam+'_'+'image_'+str(cnt)+".jpg")
                 cv2.imwrite(save_path+'cam'+args.cam+'_'+'image_'+str(cnt)+".jpg", cv_image)
                 cnt+=1
 

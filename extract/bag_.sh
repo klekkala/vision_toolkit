@@ -14,7 +14,7 @@ for entry in /data/$1/cam1/*; do
     python3 ./read_bag_.py --bag "$entry" --cam 1 --save $1
   done
 
-for entry in /data/$2/cam1/*; do
+for entry in /data/$1/cam2/*; do
     if [ "${entry: -4}" != ".bag" ]; then
         continue
     fi
@@ -23,7 +23,7 @@ for entry in /data/$2/cam1/*; do
   done
 
 
-for entry in /data/$3/cam1/*; do
+for entry in /data/$1/cam3/*; do
     if [ "${entry: -4}" != ".bag" ]; then
         continue
     fi
