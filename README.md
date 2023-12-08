@@ -3,8 +3,10 @@
 
 The program takes something as input and saves it into something. You can run it through this command
 
-
-
+```
+./bag_.sh 2023_06_30
+```
+It will extract images from bag file,you just have to give it the bag folder, assuming it has cam1, cam2, cam3, cam4, cam5.
 
 # 3dobject_tracking
 
