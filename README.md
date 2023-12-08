@@ -6,7 +6,12 @@ The program takes something as input and saves it into something. You can run it
 ```
 ./bag_.sh 2023_06_30
 ```
-It will extract images from bag file,you just have to give it the bag folder, assuming it has cam1, cam2, cam3, cam4, cam5.
+It will extract images from bag file,you just have to pass the bag folder, assuming it has cam1, cam2, cam3, cam4, cam5. And it will generate a folder having same name eg 2023_06_30/imgs.
+
+```
+python split.py --data 2023_06_30 --intervalfile ./interval.txt
+```
+It will split the images folder according to the interval file.
 
 # 3dobject_tracking
 
