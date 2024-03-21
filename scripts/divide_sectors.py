@@ -30,7 +30,7 @@ file_names_all = [[] for i in range(5)]
 
 for fn in os.listdir(img_path):
     if ".jpg" in fn:
-        file_names_all[int(fn[3])].append(fn)
+        file_names_all[int(fn[3])-1].append(fn)
 
 for i in range(5):
     file_names_all[i] = sorted(file_names_all[i])    
@@ -45,6 +45,7 @@ lens = [len(i) for i in file_names_all]
 done = [0,0,0,0,0]
 interval = args.interval
 tra=0
+print(lens)
 while True:
     os.makedirs(target_path + 'sector' + str(tra) + '/input', exist_ok=True)
     os.makedirs(target_path + 'sector' + str(tra) + '/gt_dense', exist_ok=True)
