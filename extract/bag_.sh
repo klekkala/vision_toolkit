@@ -1,4 +1,4 @@
-source ./_carla-ros-bridge/catkin_ws/devel/setup.bash
+source ~/catkin_ws/devel/setup.bash
 
 
 if [ $# -eq 0 ]; then

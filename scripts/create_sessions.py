@@ -26,8 +26,8 @@ for fn in os.listdir(args.input):
     if os.path.isdir(join(args.input, fn)):
         dates.append(join(args.input, fn))
 
-print(dates)
-dates = ['/data/2023_12_18' ,'/data/2023_12_20', '/data/2023_12_24', '/data/2024_03_16']
+# print(dates)
+# dates = ['/data/2023_12_18' ,'/data/2023_12_20', '/data/2023_12_24', '/data/2024_03_16']
 with open(args.output,'w') as f:
     for date in dates:
         flag = 0

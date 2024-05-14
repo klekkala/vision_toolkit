@@ -1,6 +1,6 @@
 import os
 import shutil
-
+import sys
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -45,6 +45,12 @@ lens = [len(i) for i in file_names_all]
 done = [0,0,0,0,0]
 interval = args.interval
 tra=0
+
+for tmp_len in lens:
+    if tmp_len == 0:
+        with open('error_log_divide.txt', 'a') as error_file:
+            error_file.write(f"{args.data}\n")
+        sys.exit(1)
 print(lens)
 while True:
     os.makedirs(target_path + 'sector' + str(tra) + '/input', exist_ok=True)

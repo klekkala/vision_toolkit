@@ -86,6 +86,12 @@ for file in files:
     source_file = os.path.join(args.source_path, "sparse", file)
     destination_file = os.path.join(args.source_path, "sparse", "0", file)
     shutil.move(source_file, destination_file)
+    if file == 'points3D.bin':
+        file_size = os.path.getsize(destination_file)
+        if file_size < 10 * 1024 * 1024:  # Check if file size is less than 10 MB
+            # Add a new line to error_colmap.txt
+            with open(os.path.join(args.source_path, "error_colmap.txt"), "a") as error_file:
+                error_file.write(args.source_path + '\n')
 
 if(args.resize):
     print("Copying and resizing...")
