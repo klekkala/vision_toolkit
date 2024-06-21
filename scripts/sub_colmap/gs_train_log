@@ -1,5 +1,5 @@
 
-
+backup igpu21/home4/tmp/u/henghui  bag_dump
 backup igpu24/home2/kiran/backup  bag_dump
 backup tmpig20c gs_train
 err_gs/dump 13b
@@ -18,5 +18,5 @@ err_gs/dump 13b
 2023_08_05 25c
 07_11 21c
 07_13 21c
-07_14 13c
-07_15 13c
+07_14 21c
+07_15 21c

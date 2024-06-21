@@ -9,6 +9,7 @@ fi
 
 
 ./auto_LeGO.sh "$1"
+sleep 20
 if [ ! -s /tmp/odometry.txt ]; then
     echo "$1" >> LeGO_error.txt
 else

@@ -16,6 +16,7 @@ parser.add_argument('--check', action='store_true')
 
 args = parser.parse_args()
 save_path = "/lab/tmpig10b/kiran/bag_dump/"+args.save+"/" + args.num + "/all_imgs/"
+save_path = args.save
 os.makedirs(save_path, exist_ok=True)
 print(args.bag)
 try:
