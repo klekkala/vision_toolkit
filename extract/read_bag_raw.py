@@ -20,11 +20,11 @@ with rosbag.Bag(bag_file_path, 'r') as bag:
     for topic, msg, t in bag.read_messages(topics=['/cam1/color/image_raw']):
         # Convert the ROS Image message to a CV image
         cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-        
+
         # Construct the output file path
         timestamp = t.to_nsec()
         image_filename = os.path.join(output_dir, f'{timestamp}.png')
-        
+
         # Save the image
         cv2.imwrite(image_filename, cv_image)
         print(f'Saved image: {image_filename}')
