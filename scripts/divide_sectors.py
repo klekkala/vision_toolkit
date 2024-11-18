@@ -2,14 +2,20 @@ import os
 import shutil
 import sys
 import argparse
+import json
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str)
+parser.add_argument('--date', type=str)
+parser.add_argument('--session', type=int, default=0)
 parser.add_argument('--target', type=str)
-parser.add_argument('--interval', type=int, default = 250)
-parser.add_argument('--num', type=int, default = -1)
+parser.add_argument('--interval', type=int, default=250)
+parser.add_argument('--num', type=int, default=-1)
 args = parser.parse_args()
 
+
+# print(args.data)
+# print(args.session)
 def copy_file(source_path, destination_path):
     try:
         shutil.copy2(source_path, destination_path)
@@ -19,32 +25,31 @@ def copy_file(source_path, destination_path):
     except PermissionError:
         print(f"Error: Permission denied. Unable to copy the file.")
 
+
 img_path = args.data
 target_path = args.target
-if img_path[-1]!='/':
-    img_path+='/'
-if target_path[-1]!='/':
-    target_path+='/'
+if img_path[-1] != '/':
+    img_path += '/'
+if target_path[-1] != '/':
+    target_path += '/'
 
 file_names_all = [[] for i in range(5)]
 
 for fn in os.listdir(img_path):
     if ".jpg" in fn:
-        file_names_all[int(fn[3])-1].append(fn)
+        file_names_all[int(fn[3]) - 1].append(fn)
 
 for i in range(5):
-    file_names_all[i] = sorted(file_names_all[i])    
-
+    file_names_all[i] = sorted(file_names_all[i])
 
 if not os.path.exists(target_path):
     os.makedirs(target_path)
 
-
-counts = [0,0,0,0,0]
+counts = [0, 0, 0, 0, 0]
 lens = [len(i) for i in file_names_all]
-done = [0,0,0,0,0]
+done = [0, 0, 0, 0, 0]
 interval = args.interval
-tra=0
+tra = 0
 
 for tmp_len in lens:
     if tmp_len == 0:
@@ -52,26 +57,37 @@ for tmp_len in lens:
             error_file.write(f"{args.data}\n")
         sys.exit(1)
 print(lens)
-while True:
-    os.makedirs(target_path + 'sector' + str(tra) + '/input', exist_ok=True)
-    os.makedirs(target_path + 'sector' + str(tra) + '/gt_dense', exist_ok=True)
-    os.makedirs(target_path + 'sector' + str(tra) + '/gt_annot', exist_ok=True)
 
-    for i in range(5):
-        while counts[i] < round(lens[i]/(lens[0]/float(interval))*(tra+1)):
-            if counts[i] == lens[i]-1:
-                done[i]=1
-                break
-            if not os.path.exists(f'{img_path}{file_names_all[i][counts[i]]}'):
-                print(f'{img_path}{file_names_all[i][counts[i]]}')
-                raise ValueError("No image")
-            copy_file(f'{img_path}{file_names_all[i][counts[i]]}', f'{target_path}sector{tra}/input/{file_names_all[i][counts[i]]}')
-            counts[i] += 1
-            
+with open(f'/lab/tmpig23b/navisim/data/bag_dump/{args.date}/{args.session}/sector_data.json', 'w') as sector_data_file:
+    sector_data_list = []
 
-    tra+=1
-    if args.num==tra:
-        break
-    if sum(done) == 5:
-        break
+    while True:
+        os.makedirs(target_path + 'sector' + str(tra) + '/input', exist_ok=True)
+        os.makedirs(target_path + 'sector' + str(tra) + '/gt_dense', exist_ok=True)
+        os.makedirs(target_path + 'sector' + str(tra) + '/gt_annot', exist_ok=True)
+
+        sector_images = []
+
+        for i in range(5):
+            while counts[i] < round(lens[i] / (lens[0] / float(interval)) * (tra + 1)):
+                if counts[i] == lens[i] - 1:
+                    done[i] = 1
+                    break
+                if not os.path.exists(f'{img_path}{file_names_all[i][counts[i]]}'):
+                    print(f'{img_path}{file_names_all[i][counts[i]]}')
+                    raise ValueError("No image")
+                copy_file(f'{img_path}{file_names_all[i][counts[i]]}',
+                          f'{target_path}sector{tra}/input/{file_names_all[i][counts[i]]}')
+                sector_images.append(file_names_all[i][counts[i]])
+                counts[i] += 1
+
+        sector_data_list.append({f"sector{tra}": sector_images})
+
+        tra += 1
+        if args.num == tra:
+            break
+        if sum(done) == 5:
+            break
+
+    json.dump(sector_data_list, sector_data_file, indent=4)
 
