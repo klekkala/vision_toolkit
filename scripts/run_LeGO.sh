@@ -9,8 +9,8 @@ date=$(basename "$1")
 bag_count=0
 
 # Loop through each bag file and execute the script
-for bag_file in $(ls -v /lab/tmpig23b/navisim/data/bag_dump/$1/bags/cam1/*.bag); do
-    ./vision_toolkit/scripts/auto_LeGO.sh "$bag_file"
+for bag_file in $(ls -v /lab/tmpig23b/navisim/data/bags/$1/$2/cam1/*.bag); do
+    ./auto_LeGO.sh "$bag_file"
     if [ ! -s /tmp/odometry.txt ]; then
         echo "$1 $bag_file" >> LeGO_error.txt
     else
