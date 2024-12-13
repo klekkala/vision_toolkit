@@ -8,11 +8,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--frame', type=int)
 parser.add_argument('--bag', type=str)
 parser.add_argument('--cam', type=str)
-parser.add_argument('--save', type=str)
+parser.add_argument('--date', type=str)
 parser.add_argument('--check', action='store_true')
 args = parser.parse_args()
 
-save_path = f'/lab/tmpig23b/navisim/data/bags/{args.date}/{args.save}/bags/cam{args.cam}'
+save_path = f'/lab/tmpig13b/jiwon/bags/{args.date}/cam{args.cam}'
 os.makedirs(save_path, exist_ok=True)
 print(args.bag)
 def fetch_remote_file(remote_path, local_path):
