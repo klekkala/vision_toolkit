@@ -11,7 +11,7 @@ do
       if [ "${entry: -4}" != ".bag" ]; then
           continue
       fi
-      python3 download_bag.py --bag "student@iGpu10:${entry}" --cam "$i" --save $1
+      python3 download_bag.py --bag "student@iGpu10:${entry}" --cam "$i" --session $1
       ((index++))
   done
 done
