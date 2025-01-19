@@ -1,5 +1,5 @@
 #!/bin/bash
-source /home2/student/catkin_ws/devel/setup.bash
+source ~/catkin_ws/devel/setup.bash
 rosparam set use_sim_time true
 
 bag_file=$1

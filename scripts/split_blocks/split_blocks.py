@@ -84,6 +84,3 @@ if __name__ == "__main__":
     if not is_path_exists:
         os.makedirs(output_bag_path)
     split_rosbag(bag, output_bag_path)
-                
-
-#python split_bag.py -i /lab/tmpig23b/navisim/data/bags -o /lab/tmpig23b/navisim/data/bags --date 2023_03_11
