@@ -1,5 +1,5 @@
 #!/bin/bash
-source /home2/student/catkin_ws/devel/setup.bash
+source ~/catkin_ws/devel/setup.bash
 rosparam set use_sim_time true
 
 bag_file=$1
@@ -8,7 +8,7 @@ roslaunch lego_loam run.launch &
 
 pid1=$!
 sleep 10
-rosbag play "$bag_file" --topic /velodyne_points /imu/data --clock &
+rosbag play "$bag_file" --topic /velodyne_points /cam1/imu --clock &
 
 pid2=$!
 
