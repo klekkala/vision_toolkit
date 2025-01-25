@@ -47,3 +47,7 @@
 /data/2023_07_03/cam1/test_2023-07-04-02-30-06.bag
 /data/2023_07_31/cam1/test_2023-07-31-02-36-08.bag
 /data/2023_07_03/cam1/test_2023-07-04-02-30-06.bag
+2023_03_11 /lab/tmpig23b/navisim/data/bags/2023_03_11/0/cam1/test_2023-03-11-11-05-59.bag
+2023_03_11 /lab/tmpig23b/navisim/data/bags/2023_03_11/0/cam1/test_2023-03-11-11-05-59.bag
+2023_03_11 /lab/tmpig23b/navisim/data/bags/2023_03_11/0/cam1/blocks/test_2023-03-11-11-05-59_block_0.bag
+2023_03_11 /lab/tmpig23b/navisim/data/bags/2023_03_11/0/cam1/blocks/test_2023-03-11-11-05-59_block_1.bag

@@ -79,6 +79,7 @@ for i in range(len(time)):
                 res[cam-1] = file_name
     closest_pose+=res
 
+print(interpolation_time)
 interpolated_x = interpolator_x(interpolation_time)
 interpolated_y = interpolator_y(interpolation_time)
 interpolated_z = interpolator_z(interpolation_time)
@@ -101,7 +102,7 @@ rotation = [[0, 2.82743338823082-3.14159265358979, 0], [0, 3.14159265358979-2.19
 
 # velodine = tf.euler.euler2mat(1.5707963267949, 3.14159265358979, 0, 'sxyz')
 print('+554322333')
-with open(os.path.join(OUTFILE,'odometry.txt'), "w") as f:
+with open(os.path.join(OUTFILE, 'odometry.txt'), "w") as f:
     for i in range(len(interpolation_time)):
         for file_name in name_dict[time_dict[interpolation_time[i]]]:
             if file_name not in closest_pose:

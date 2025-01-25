@@ -10,15 +10,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--frame', type=int)
 parser.add_argument('--bag', type=str)
 parser.add_argument('--cam', type=str)
-parser.add_argument('--save', type=str)
-parser.add_argument('--num', type=str)
+parser.add_argument('--date', type=str)
+parser.add_argument('--session', type=str)
 parser.add_argument('--check', action='store_true')
 
 args = parser.parse_args()
-
-save_path = "/lab/tmpig23b/navisim/data/bag_dump/"+args.save+"/" + args.num + "/all_imgs/"
+save_path = "/lab/tmpig23b/vision_toolkit/data/bag_dump/"+args.date+"/"+args.session+"/all_imgs/"
 os.makedirs(save_path, exist_ok=True)
-print(args.bag)
+
 try:
     bag = rosbag.Bag(args.bag)
 except rosbag.bag.ROSBagException as e:
