@@ -1,11 +1,13 @@
 ## VISION_TOOLKIT
-Contains code to extract images, pcd, gpt and legoloam, pcl, odom and text_gpt
+Contains code to extract raw bag into bag dumps, divide sectors from sessions and to process election map from sector point clouds 
+
+Needs to install 3d2d_ann at some location and need to define the path to use the library
 
 ### More about Vision Toolkit
 | Component | Description |
 | ---- | --- |
-|BlockPcl|Contains codes and implementation necessary to extract files into blocks to read pcl files|
 |BagDump|Contains codes and implemenation to extract necessary files in bag dump|
+|BlockPcl|Contains codes and implementation necessary to extract files into blocks to read pcl files|
 Usually, VisionTool is used to either:
 * To extract files into bag_dump folder
 * To preprocess files to run bag_dump
