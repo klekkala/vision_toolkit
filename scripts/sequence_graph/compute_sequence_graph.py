@@ -116,17 +116,6 @@ def plot_3d_scatter(trajectory_map, title="sequence_3D_trajectories"):
     plt.show()
 
 def build_sequence_graph(sequence):
-    # trajectory_map = {}
-
-    # for trajectory in trajectories:
-    #     trajectory_path = trajectory.split("/")
-    #     date, session = trajectory_path[-4],  trajectory_path[-3]
-    #     trajectory_id = f'{date}_{session}'
-
-    #     sequence = create_sequence(trajectory)
-    #     if sequence.shape != (0,):
-    #         trajectory_map[trajectory_id] = create_sequence(trajectory)
-
     sequence_map = {}
 
     for idx, seq in enumerate(sequence):
@@ -149,9 +138,7 @@ def build_sequence_graph(sequence):
             if _trajectories_cross(g.nodes[traj1_id]['points'], g.nodes[traj2_id]['points'], distance_threshold):
                 g.add_edge(traj1_id, traj2_id)
 
-    plot_3d_scatter(sequence_map)
-    plot_birdeye_view(sequence_map)
-    plot_seq_graph(g)
+    return g
 
 
 def _trajectories_cross(points1, points2, distance_threshold):
@@ -182,7 +169,7 @@ def create_subsequence(sequence, threshold = 17.33):
     sorted_matrix = sequence[sorted_indices]
     timestamps_sorted = timestamps_in_seconds[sorted_indices]
     
-    splits = []
+    subsequences = []
     current_split = [sorted_matrix[0]] 
     current_start_time = timestamps_sorted[0]  # Track the start time of the current split
 
@@ -193,15 +180,15 @@ def create_subsequence(sequence, threshold = 17.33):
             current_split.append(sorted_matrix[i])  # Add the current row to the split
         else:
             # Save the current split and start a new one
-            splits.append(np.array(current_split))
+            subsequences.append(np.array(current_split))
             current_split = [sorted_matrix[i]]
             current_start_time = timestamps_sorted[i]  # Update the start time
 
     # Add the last split
     if current_split:
-        splits.append(np.array(current_split))
+        subsequences.append(np.array(current_split))
 
-    return splits
+    return subsequences
 
 def plot_seq_graph(graph, title = 'sequence_graph'):
     plt.figure(figsize=(8, 6))  # Adjust the figure size
@@ -226,32 +213,37 @@ def plot_seq_graph(graph, title = 'sequence_graph'):
     plt.savefig(f'{title.lower()}.png', dpi=300, bbox_inches='tight')
     plt.show()
 
+def save_sequence_graph(graph, output):
+    nx.write_gpickle(graph, os.path.join(output, "sequence_graph.gpickle"))
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--odo', type=str)
-parser.add_argument('--output', type=str)
-parser.add_argument('--display', type =bool, default=True)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--odo', type=str)
+    parser.add_argument('--output', type=str)
+    parser.add_argument('--display_result', type=bool, default=True)
+    args = parser.parse_args()
 
-args = parser.parse_args()
-ODOM_DIR = args.odo
-OUT_PATH = args.output
-display = args.display
+    ODOM_DIR = args.odo
+    OUT_PATH = args.output
+    display = args.display
 
-trajectory_files = get_trajectory_files(ODOM_DIR)
-sequences = [create_sequence(trajectory) for trajectory in trajectory_files]
-longest_sequence = max(sequences, key = len)
-subsequence = create_subsequence(longest_sequence)
+    trajectory_files = get_trajectory_files(ODOM_DIR)
+    sequences = [create_sequence(trajectory) for trajectory in trajectory_files]
 
-sequence_graph = build_sequence_graph(subsequence)
+    for seq in sequences:
+        sub_sequences = create_subsequence(seq)
 
-# sector_odometries = list_sector_odom(ODOM_DIR)
-# sequence_graph = build_sequence_graph(sector_odometries)
-# if display:
-#     plot_graph_2d(sequence_graph)
-#     plot_sequence_graph_3d(sequence_graph)
+        for sub_sequence in sub_sequences:
+            g = build_sequence_graph(sub_sequences)
 
 
+    # longest_sequence = max(sequences, key=len)
+    # subsequence = create_subsequence(longest_sequence)
 
-#python compute_sequence_graph.py --odo /lab/tmpig13b/kiran/bag_dump
-#python compute_sequence_graph.py --odo /lab/tmpig23b/navisim/data/bag_dump/2023_03_11/0/all_odom
+
+    # sector_odometries = list_sector_odom(ODOM_DIR)
+    # sequence_graph = build_sequence_graph(sector_odometries)
+    # if display:
+    #     plot_graph_2d(sequence_graph)
+    #     plot_sequence_graph_3d(sequence_graph)
