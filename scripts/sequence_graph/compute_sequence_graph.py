@@ -214,6 +214,9 @@ def plot_seq_graph(graph, date, block_id, title = 'sequence_graph'):
     plt.show()
 
 def save_sequence_graph(graph, output):
+    if not os.path.exists(output):
+        os.makedirs(output)
+
     nx.write_gpickle(graph, os.path.join(output, "sequence_graph.gpickle"))
 
 
@@ -238,6 +241,7 @@ if __name__ == "__main__":
 
         # for sub_idx, sub_sequence in enumerate(sub_sequences):
         g, seq_map = build_sequence_graph(sub_sequences)
+        save_sequence_graph(g, output = f'{DATE}/{block_id}')
 
         if display:
             if not os.path.exists(f'{DATE}/{block_id}'):
