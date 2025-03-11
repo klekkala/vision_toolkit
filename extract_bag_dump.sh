@@ -13,6 +13,6 @@ PROJECTION_FOLDER="$HOME/3d2d_ann"
 "$PROJECTION_FOLDER/sync_cam.sh" "$1"
 "$PROJECTION_FOLDER/gpt4/extract_and_gpt4.sh" "$1"
 
-# ./vision_toolkit/scripts/run_divide.sh "$1"
+.//scripts/run_divide.sh "$1"
 
   
