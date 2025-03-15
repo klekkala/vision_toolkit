@@ -1,5 +1,7 @@
 import open3d as o3d
 import numpy as np
+import argparse
+
 from pathlib import Path
 
 from scipy.spatial.transform import Rotation as R
@@ -16,8 +18,8 @@ def get_visible_points(pcd, poses):
 
     return pcd.select_by_index(list(visible_points))  # Filter point cloud
 
-def save_point_cloud(output_path):
-    success = o3d.io.write_point_cloud(output_path, visible_pcd, write_ascii=False, compressed=False)
+def save_point_cloud(output_path, pcd):
+    success = o3d.io.write_point_cloud(output_path, pcd, write_ascii=False, compressed=False)
 
     if success:
         print(f"Point cloud successfully saved to {output_path}")
@@ -59,26 +61,32 @@ def sort_poses_by_timestamp(poses, timestamps):
     
     return list(sorted_poses), list(sorted_timestamps)
 
-date = '2023_03_11'
-total_sessions = 1
-
-for session in range(total_sessions):
-    pcd_path = f'/lab/tmpig23b/vision_toolkit/data/bag_dump/{date}/{session}'
+def sector2sequence(date, session, src_dir, out_dir, window_size=20):
+    pcd_path = f'{src_dir}/{date}/{session}'
     pcd = o3d.io.read_point_cloud(f'{pcd_path}/all_lego/surfaceMap.pcd')
     poses, timestamps = read_odometry(f'{pcd_path}/all_odom/odometry.txt')
     poses, timestamps = sort_poses_by_timestamp(poses, timestamps)
 
-    window_size = 20  # 50 seconds
-    step_size = 5  # 5 seconds overlap between windows
-
     start_time = min(timestamps)
     index = 0
 
-    Path(f"{date}/{session}").mkdir(parents=True, exist_ok=True)
+    Path(f"{out_dir}/{date}/{session}").mkdir(parents=True, exist_ok=True)
 
     while start_time <= max(timestamps):
         window_poses = filter_poses_by_time_window(poses, timestamps, start_time, window_size)
         visible_pcd = get_visible_points(pcd, window_poses)
-        save_point_cloud(f'{date}/{session}/sequence{index}.pcd')
+        save_point_cloud(f'{date}/{session}/sequence{index}.pcd', visible_pcd)
+        
         index += 1
         start_time += window_size
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--date', type=str)
+    parser.add_argument('--session', type=int)
+    parser.add_argument('--window_size', type=int, default=20)
+    parser.add_argument('--src_dir', type=str, default ='/lab/tmpig23b/vision_toolkit/data/bag_dump')
+    parser.add_argument('--out_dir', type=str, default = '.')
+
+    args = parser.parse_args()
+    sector2sequence(args.date, args.session, args.src_dir, args.out_dir, args.window_size)
