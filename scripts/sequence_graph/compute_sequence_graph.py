@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def get_all_dates(root_path):
+def get_all_blocks(root_path):
     """
     Recursively list all files and folders under a given path.
 
@@ -22,29 +22,30 @@ def get_all_dates(root_path):
         List of all files and folders.
     """
     date_pattern = re.compile(r"^\d{4}_\d{2}_\d{2}$")  # Regex for yyyy_mm_dd
-    date_dirs = []
+    sessions = []
 
     for entry in os.listdir(root_path):
         full_path = os.path.join(root_path, entry)
-        if os.path.isdir(full_path) and date_pattern.match(entry):
-            date_dirs.append(full_path)
+        if os.path.isdir(full_path):
+            sessions.append(full_path)
     
-    return date_dirs
+    return sessions
 
 def get_all_sessions(date_path):
     sessions = []
     for entry in os.listdir(date_path):
         full_path = os.path.join(date_path, entry)
         sessions.append(os.path.join(full_path, 'all_odom', 'odometry.txt'))
-    return sessions
+
+    return sorted(sessions)
 
 
 def get_trajectory_files(root_path):
-    all_path_dates = get_all_dates(root_path)
+    all_path_blocks = get_all_blocks(root_path)
     trajectories = []
     
-    for path_date in all_path_dates:
-        sessions = get_all_sessions(path_date)
+    for block_path in all_path_blocks:
+        sessions = get_all_sessions(block_path)
         trajectories.extend(sessions)
     
     return trajectories
@@ -59,7 +60,7 @@ def create_sequence(trajectory_file):
                 data.append([float(x) if idx != 6 else int(x.replace('.', '')) for idx, x in enumerate(parts)])
     return np.array(data)
 
-def plot_birdeye_view(trajectory_map, title ='sequence_birdeye_view'):
+def plot_birdeye_view(trajectory_map, date, block_id, title ='sequence_birdeye_view'):
     plt.figure()
     cmap = cm.get_cmap('tab10', len(trajectory_map))  # Use a colormap with a fixed number of colors
     
@@ -78,10 +79,10 @@ def plot_birdeye_view(trajectory_map, title ='sequence_birdeye_view'):
     plt.xlabel('X Coordinate')
     plt.ylabel('Y Coordinate')
 
-    plt.savefig(f'{title.lower()}.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'{date}/{block_id}/{title.lower()}.png', dpi=300, bbox_inches='tight')
     plt.show()
 
-def plot_3d_scatter(trajectory_map, title="sequence_3D_trajectories"):
+def plot_3d_scatter(trajectory_map, date, block_id, title="sequence_3D_trajectories"):
     """
     Plots a 3D scatter graph of x, y, z coordinates to show the traveled paths.
 
@@ -112,21 +113,10 @@ def plot_3d_scatter(trajectory_map, title="sequence_3D_trajectories"):
     ax.set_ylabel('Y Coordinate')
     ax.set_zlabel('Z Coordinate')
 
-    plt.savefig(f'{title.lower()}.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'{date}/{block_id}/{title.lower()}.png', dpi=300, bbox_inches='tight')
     plt.show()
 
 def build_sequence_graph(sequence):
-    # trajectory_map = {}
-
-    # for trajectory in trajectories:
-    #     trajectory_path = trajectory.split("/")
-    #     date, session = trajectory_path[-4],  trajectory_path[-3]
-    #     trajectory_id = f'{date}_{session}'
-
-    #     sequence = create_sequence(trajectory)
-    #     if sequence.shape != (0,):
-    #         trajectory_map[trajectory_id] = create_sequence(trajectory)
-
     sequence_map = {}
 
     for idx, seq in enumerate(sequence):
@@ -134,7 +124,6 @@ def build_sequence_graph(sequence):
         if seq.shape != (0,):
             sequence_map[node_id] = seq
     
-
     g = nx.Graph()
     for id, trajectory in sequence_map.items():
         g.add_node(id, points = trajectory)
@@ -149,9 +138,7 @@ def build_sequence_graph(sequence):
             if _trajectories_cross(g.nodes[traj1_id]['points'], g.nodes[traj2_id]['points'], distance_threshold):
                 g.add_edge(traj1_id, traj2_id)
 
-    plot_3d_scatter(sequence_map)
-    plot_birdeye_view(sequence_map)
-    plot_seq_graph(g)
+    return g, sequence_map
 
 
 def _trajectories_cross(points1, points2, distance_threshold):
@@ -182,7 +169,7 @@ def create_subsequence(sequence, threshold = 17.33):
     sorted_matrix = sequence[sorted_indices]
     timestamps_sorted = timestamps_in_seconds[sorted_indices]
     
-    splits = []
+    subsequences = []
     current_split = [sorted_matrix[0]] 
     current_start_time = timestamps_sorted[0]  # Track the start time of the current split
 
@@ -193,17 +180,17 @@ def create_subsequence(sequence, threshold = 17.33):
             current_split.append(sorted_matrix[i])  # Add the current row to the split
         else:
             # Save the current split and start a new one
-            splits.append(np.array(current_split))
+            subsequences.append(np.array(current_split))
             current_split = [sorted_matrix[i]]
             current_start_time = timestamps_sorted[i]  # Update the start time
 
     # Add the last split
     if current_split:
-        splits.append(np.array(current_split))
+        subsequences.append(np.array(current_split))
 
-    return splits
+    return subsequences
 
-def plot_seq_graph(graph, title = 'sequence_graph'):
+def plot_seq_graph(graph, date, block_id, title = 'sequence_graph'):
     plt.figure(figsize=(8, 6))  # Adjust the figure size
     
     # Get positions for a spring layout (better for dense graphs)
@@ -223,35 +210,43 @@ def plot_seq_graph(graph, title = 'sequence_graph'):
     
     # Add a title
     plt.title(title, fontsize=14)
-    plt.savefig(f'{title.lower()}.png', dpi=300, bbox_inches='tight')
+    plt.savefig(f'{date}/{block_id}/{title.lower()}.png', dpi=300, bbox_inches='tight')
     plt.show()
 
+def save_sequence_graph(graph, output):
+    if not os.path.exists(output):
+        os.makedirs(output)
+
+    nx.write_gpickle(graph, os.path.join(output, "sequence_graph.gpickle"))
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--odo', type=str)
-parser.add_argument('--output', type=str)
-parser.add_argument('--display', type =bool, default=True)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--date', type = str)
+    parser.add_argument('--odo', type=str)
+    parser.add_argument('--output', type=str)
+    parser.add_argument('--display_result', type=bool, default=True)
+    args = parser.parse_args()
 
-args = parser.parse_args()
-ODOM_DIR = args.odo
-OUT_PATH = args.output
-display = args.display
+    DATE = args.date
+    ODOM_DIR = args.odo
+    OUT_PATH = args.output
+    display = args.display_result
 
-trajectory_files = get_trajectory_files(ODOM_DIR)
-sequences = [create_sequence(trajectory) for trajectory in trajectory_files]
-longest_sequence = max(sequences, key = len)
-subsequence = create_subsequence(longest_sequence)
+    trajectory_files = get_trajectory_files(ODOM_DIR)
+    sequences = [create_sequence(trajectory) for trajectory in trajectory_files]
+    
+    for block_id, seq in enumerate(sequences):
+        sub_sequences = create_subsequence(seq)
 
-sequence_graph = build_sequence_graph(subsequence)
+        # for sub_idx, sub_sequence in enumerate(sub_sequences):
+        g, seq_map = build_sequence_graph(sub_sequences)
+        save_sequence_graph(g, output = f'{DATE}/{block_id}')
 
-# sector_odometries = list_sector_odom(ODOM_DIR)
-# sequence_graph = build_sequence_graph(sector_odometries)
-# if display:
-#     plot_graph_2d(sequence_graph)
-#     plot_sequence_graph_3d(sequence_graph)
+        if display:
+            if not os.path.exists(f'{DATE}/{block_id}'):
+                os.makedirs(f'{DATE}/{block_id}')
 
-
-
-#python compute_sequence_graph.py --odo /lab/tmpig13b/kiran/bag_dump
-#python compute_sequence_graph.py --odo /lab/tmpig23b/navisim/data/bag_dump/2023_03_11/0/all_odom
+            plot_3d_scatter(seq_map, date = DATE, block_id = block_id)
+            plot_birdeye_view(seq_map, date = DATE, block_id = block_id)
+            plot_seq_graph(g, date = DATE, block_id = block_id)
