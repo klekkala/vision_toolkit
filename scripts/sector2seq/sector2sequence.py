@@ -3,7 +3,6 @@ import numpy as np
 import argparse
 
 from pathlib import Path
-
 from scipy.spatial.transform import Rotation as R
 
 def get_visible_points(pcd, poses):
@@ -25,6 +24,15 @@ def save_point_cloud(output_path, pcd):
         print(f"Point cloud successfully saved to {output_path}")
     else:
         print("Failed to save the point cloud.")
+    
+def save_odometry(output_path, poses):
+    """Save odometry data to a file."""
+    with open(output_path, 'w') as f:
+        for pose in poses:
+            x, y, z = pose[:3, 3]  # Extract translation
+            roll, pitch, yaw = R.from_matrix(pose[:3, :3]).as_euler('xyz', degrees=False)  # Extract rotation
+            f.write(f"{x},{y},{z},{roll},{pitch},{yaw}\n")
+
 
 def read_odometry(file_path):
     poses = []
@@ -70,12 +78,20 @@ def sector2sequence(date, session, src_dir, out_dir, window_size=20):
     start_time = min(timestamps)
     index = 0
 
-    Path(f"{out_dir}/{date}/{session}").mkdir(parents=True, exist_ok=True)
-
     while start_time <= max(timestamps):
         window_poses = filter_poses_by_time_window(poses, timestamps, start_time, window_size)
         visible_pcd = get_visible_points(pcd, window_poses)
-        save_point_cloud(f'{date}/{session}/sequence{index}.pcd', visible_pcd)
+
+        output_path = f'{date}/{session}/{index}'
+
+        Path(output_path).mkdir(parents=True, exist_ok=True)
+
+        sequence_out_path = f'{output_path}/sequence.pcd'
+        odom_output_path = f"{output_path}/odometry.txt"
+
+
+        save_point_cloud(sequence_out_path, visible_pcd)
+        save_odometry(odom_output_path, window_poses)
         
         index += 1
         start_time += window_size
