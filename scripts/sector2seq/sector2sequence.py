@@ -3,7 +3,6 @@ import numpy as np
 import argparse
 
 from pathlib import Path
-
 from scipy.spatial.transform import Rotation as R
 
 def get_visible_points(pcd, poses):
@@ -88,7 +87,7 @@ def sector2sequence(date, session, src_dir, out_dir, window_size=20):
         Path(output_path).mkdir(parents=True, exist_ok=True)
 
         sequence_out_path = f'{output_path}/sequence.pcd'
-        odom_output_path = f"{output_path}/odom.txt"
+        odom_output_path = f"{output_path}/odometry.txt"
 
 
         save_point_cloud(sequence_out_path, visible_pcd)
