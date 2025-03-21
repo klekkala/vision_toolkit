@@ -1,6 +1,7 @@
-import sys
+import argparse
 import os
 import numpy as np
+from pathlib import Path
 import matplotlib.pyplot as plt
 
 
@@ -15,7 +16,7 @@ def plot_occupancy_map(data, save_path):
         vmin=0,
         vmax=1,
         origin='lower',
-        aspect='auto'
+        aspect='equal'
     )
     plt.title('Occupancy Map')
     plt.xlabel('X')
@@ -34,7 +35,7 @@ def plot_elevation_map(data, save_path):
         cmap='terrain',
         vmax=10,  # Set upper limit
         origin='lower',
-        aspect='auto'
+        aspect='equal'
     )
     plt.colorbar(label='Elevation')
     plt.title('Elevation Map')
@@ -105,12 +106,19 @@ def search_and_read_npy_file(directory, filename=None):
 
 
 if __name__ == "__main__":
-    npy_path = sys.argv[1]     # Input elevation_map.npy folder
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--path', type=str)
+    parser.add_argument('--date', type=str)
+    parser.add_argument('--session',type=str)
+    parser.add_argument('--sequence', type=str)
+    args = parser.parse_args()
 
-    elevation_map = search_and_read_npy_file(npy_path, filename='elevation_map.npy')
-    occupancy_map = search_and_read_npy_file(npy_path, filename='occupancy_map.npy')
+    path = Path(args.path, args.date, args.session, args.sequence)
 
-    plot_elevation_map(elevation_map, os.path.join(npy_path, "elevation_map.png")) # Result should saved in the Same folder
-    plot_occupancy_map(occupancy_map, os.path.join(npy_path, "occupancy_map.png")) # Result should saved in the Same folder
+    elevation_map = search_and_read_npy_file(path, filename='elevation_map.npy')
+    occupancy_map = search_and_read_npy_file(path, filename='occupancy_map.npy')
+
+    plot_elevation_map(elevation_map, os.path.join(path, "elevation_map.png")) # Result should saved in the Same folder
+    plot_occupancy_map(occupancy_map, os.path.join(path, "occupancy_map.png")) # Result should saved in the Same folder
 
 # python plot_map.py ./sec4/
