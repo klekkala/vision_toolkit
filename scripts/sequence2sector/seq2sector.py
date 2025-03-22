@@ -96,7 +96,7 @@ def sequence2sector(date, session, src_dir, out_dir, window_size=20):
         start_time += window_size
 
 if __name__ == "__main__":
-    print('Build sequences from sector')
+    print('Build sectors from sequence')
     parser = argparse.ArgumentParser()
     parser.add_argument('--date', type=str)
     parser.add_argument('--session', type=int)

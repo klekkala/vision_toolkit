@@ -112,11 +112,11 @@ def search_and_read_npy_file(directory, filename=None):
     return None
 
 
-def get_map(date, session, sequence, name):
+def get_map(date, session, sector, name):
     key = {
         "date": date,
         'session': session,
-        'sequence': sequence,
+        'sector': sector,
         'file_name': name
     }   
     raw_data = RocksDB().get(json.dumps(key))
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     parser.add_argument('--sector', type=str)
     args = parser.parse_args()
 
-    path = Path(args.path, args.date, args.session, args.sector, 'rocks')
+    path = Path(args.path, args.date, args.session, args.sector)
     path.mkdir(parents=True, exist_ok=True)
 
     # elevation_map = search_and_read_npy_file(path, filename='elevation_map.npy')

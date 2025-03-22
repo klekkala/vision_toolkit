@@ -8,26 +8,26 @@ from scipy.spatial import KDTree
 from scipy.spatial.transform import Rotation as R
 from pathlib import Path
 
-def get_sequences(path, date, session):
+def get_sectors(path, date, session):
     directory = Path(path, date, session)
     if not directory.exists():
         raise FileNotFoundError(f"Error: Directory '{directory}' does not exist.")
 
-    sequences = []
+    sectors = []
 
     for seq in sorted(os.listdir(directory), key = lambda x : int(x)):
         try:
             pcd, odometry = get_pcd_odometry(Path(path, date, str(session), seq))
-            sequences.append((pcd, odometry))
+            sectors.append((pcd, odometry))
         except FileNotFoundError:
             #TODO(jiwon) : handle error
 
             continue
-    return sequences
+    return sectors
 
     # return [get_pcd_odometry(Path(path, date, str(session), seq)) for seq in sorted(os.listdir(directory), key = lambda x : int(x))]
 
-def get_pcd_odometry(path, pcd_name = 'sequence.pcd', odometry_name='odometry.txt'):
+def get_pcd_odometry(path, pcd_name = 'sector.pcd', odometry_name='odometry.txt'):
     pcd_path = Path(path, pcd_name)
     odometry_path = Path(path, odometry_name)
 
@@ -111,8 +111,8 @@ if __name__ == "__main__":
 
     display = args.display
 
-    sequences = get_sequences(args.path, args.date, args.session)
-    np_trajectories = [trajectory2np(trajectory) for (pcd, trajectory) in sequences]
+    sectors = get_sectors(args.path, args.date, args.session)
+    np_trajectories = [trajectory2np(trajectory) for (pcd, trajectory) in sectors]
     g, seq_map = build_sequence_graph(np_trajectories)
 
     output_path = Path(OUT, DATE, SESSION)
