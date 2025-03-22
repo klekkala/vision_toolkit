@@ -34,7 +34,6 @@ def pointcloud2elevation(points, num_bins = 100):
     elevation_map, x_edges, z_edges, _ = binned_statistic_2d(
         x, z, y, statistic='mean', bins=num_bins
     )
-
     return elevation_map
 
 def get_elevation_map(point_cloud, height_limit=10):

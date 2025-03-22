@@ -69,7 +69,7 @@ def sort_poses_by_timestamp(poses, timestamps):
     
     return list(sorted_poses), list(sorted_timestamps)
 
-def sector2sequence(date, session, src_dir, out_dir, window_size=20):
+def sequence2sector(date, session, src_dir, out_dir, window_size=20):
     pcd_path = f'{src_dir}/{date}/{session}'
     pcd = o3d.io.read_point_cloud(f'{pcd_path}/all_lego/surfaceMap.pcd')
     poses, timestamps = read_odometry(f'{pcd_path}/all_odom/odometry.txt')
@@ -86,11 +86,10 @@ def sector2sequence(date, session, src_dir, out_dir, window_size=20):
 
         Path(output_path).mkdir(parents=True, exist_ok=True)
 
-        sequence_out_path = f'{output_path}/sequence.pcd'
+        sector_output_path = f'{output_path}/sector.pcd'
         odom_output_path = f"{output_path}/odometry.txt"
 
-
-        save_point_cloud(sequence_out_path, visible_pcd)
+        save_point_cloud(sector_output_path, visible_pcd)
         save_odometry(odom_output_path, window_poses)
         
         index += 1
@@ -106,4 +105,4 @@ if __name__ == "__main__":
     parser.add_argument('--out_dir', type=str, default = '.')
 
     args = parser.parse_args()
-    sector2sequence(args.date, args.session, args.src_dir, args.out_dir, args.window_size)
+    sequence2sector(args.date, args.session, args.src_dir, args.out_dir, args.window_size)

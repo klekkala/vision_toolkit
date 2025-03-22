@@ -6,8 +6,8 @@ SRC='/lab/kiran/vision_toolkit/'
 
 script_dir=$(dirname "$(realpath "$0")")
 
-for SEQUENCE in 0 1 2 3 4
+for sector in 0 1 2 3 4
 do
-    python "$script_dir"/build_elevation_occupancy.py --path "$SRC" --date "$DATE" --session "$SESSION" --sequence "$SEQUENCE"
-    python "$script_dir"/plot_map.py --path "$SRC" --date "$DATE" --session "$SESSION" --sequence "$SEQUENCE"
+    python "$script_dir"/build_elevation_occupancy.py --path "$SRC" --date "$DATE" --session "$SESSION" --sector "$sector"
+    python "$script_dir"/plot_map.py --path "$SRC" --date "$DATE" --session "$SESSION" --sector "$sector"
 done
