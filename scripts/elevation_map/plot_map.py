@@ -1,9 +1,16 @@
 import argparse
 import os
 import numpy as np
-from pathlib import Path
 import matplotlib.pyplot as plt
+import sys
+import json
+import io
 
+from pathlib import Path
+
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from scripts.database.rocksdb import RocksDB
 
 def plot_occupancy_map(data, save_path):
     """
@@ -105,20 +112,33 @@ def search_and_read_npy_file(directory, filename=None):
     return None
 
 
+def get_map(date, session, sequence, name):
+    key = {
+        "date": date,
+        'session': session,
+        'sequence': sequence,
+        'file_name': name
+    }   
+    raw_data = RocksDB().get(json.dumps(key))
+    buffer = io.BytesIO(raw_data)
+    return np.load(buffer, allow_pickle=True)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=str)
     parser.add_argument('--date', type=str)
     parser.add_argument('--session',type=str)
-    parser.add_argument('--sequence', type=str)
+    parser.add_argument('--sector', type=str)
     args = parser.parse_args()
 
-    path = Path(args.path, args.date, args.session, args.sequence)
+    path = Path(args.path, args.date, args.session, args.sector, 'rocks')
+    path.mkdir(parents=True, exist_ok=True)
 
-    elevation_map = search_and_read_npy_file(path, filename='elevation_map.npy')
-    occupancy_map = search_and_read_npy_file(path, filename='occupancy_map.npy')
+    # elevation_map = search_and_read_npy_file(path, filename='elevation_map.npy')
+    # occupancy_map = search_and_read_npy_file(path, filename='occupancy_map.npy')
+    elevation_map = get_map(args.date, args.session, args.sector, 'elevation')
+    occupancy_map = get_map(args.date, args.session, args.sector, 'occupancy')
 
     plot_elevation_map(elevation_map, os.path.join(path, "elevation_map.png")) # Result should saved in the Same folder
     plot_occupancy_map(occupancy_map, os.path.join(path, "occupancy_map.png")) # Result should saved in the Same folder
-
-# python plot_map.py ./sec4/
