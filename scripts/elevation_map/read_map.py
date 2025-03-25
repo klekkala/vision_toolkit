@@ -15,7 +15,31 @@ def smooth_out_point_cloud(points, axis_height, min_height, max_height):
     points = points[(points[:, axis_height] >= min_height) & (points[:, axis_height] <= max_height)]
     return points
 
-def pointcloud2elevation(points, num_bins = 100):
+def get_dense_region_mask(elevation_map, coverage=0.90):
+    """
+    Returns bounding box covering the densest `coverage` proportion of the elevation map.
+    """
+    # Step 1: Get non-zero elevation indices
+    valid_mask = ~np.isnan(elevation_map)
+    y_idxs, x_idxs = np.where(valid_mask)  # row, col
+
+    coords = np.stack([x_idxs, y_idxs], axis=1)  # shape: (N, 2)
+
+    if coords.shape[0] == 0:
+        return None  # empty map
+
+    # Step 2: Compute percentiles
+    lower_percentile = (1 - coverage) / 2 * 100  # e.g., 5%
+    upper_percentile = (1 + coverage) / 2 * 100  # e.g., 95%
+
+    x_min = int(np.percentile(x_idxs, lower_percentile))
+    x_max = int(np.percentile(x_idxs, upper_percentile))
+    y_min = int(np.percentile(y_idxs, lower_percentile))
+    y_max = int(np.percentile(y_idxs, upper_percentile))
+
+    return x_min, x_max, y_min, y_max
+
+def pcl2elevation(points, num_bins = 100):
     '''
     Convert 3d point cloud onto 2d elevation map by plotting height on 2d plane
     Inverse Distance Weighting (IDW), with some adaptations to include nearest-neighbor checks using KDTree and post-processing for smoothing and rounding
@@ -58,31 +82,8 @@ def get_elevation_map(point_cloud, height_limit=10):
 
     point_cloud_np = np.asarray(point_cloud.points)
     point_cloud_np = smooth_out_point_cloud(point_cloud_np, axis_height=index_y, min_height=-10, max_height=height_limit)
-
-    elevation_map = pointcloud2elevation(
+    elevation_map = pcl2elevation(
         points=point_cloud_np,
         num_bins=100
     )
     return elevation_map
-
-def test(points):
-    print(points.shape)
-    x = points[:, 0]
-    y = points[:, 1]
-    z = points[:, 2]  # Use as color
-
-    plt.figure(figsize=(8, 6))
-    sc = plt.scatter(x, z, c=y, cmap='viridis', s=1)  # 'viridis' is good for height maps
-
-    print(x.min(), x.max())
-    plt.xlim(x.min(), x.max())
-    plt.ylim(z.min(), z.max())
-
-    plt.colorbar(sc, label='Height (Z)')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.title('2D Projection of Point Cloud with Z as Height')
-    plt.grid(True)
-    plt.show()
-
-    plt.savefig('test.png')
