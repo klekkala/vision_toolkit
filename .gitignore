@@ -6,3 +6,4 @@
 *.pcd
 *.txt
 *.npy
+rocksdb/

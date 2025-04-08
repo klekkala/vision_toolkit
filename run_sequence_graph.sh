@@ -11,5 +11,5 @@ SRC_DIR='/lab/tmpig23b/vision_toolkit/data/bag_dump'
 OUT_DIR='.'
 
 ./scripts/sequence2sector/seq2sector.sh $DATE $SESSION $WINDOW_SIZE $SRC_DIR $OUT_DIR
-./scripts/sequence_graph/run_compute_sequence_graph.sh $DATE $SESSION $OUT_DIR $OUT_DIR
 ./scripts/elevation_map/plot_elevation_map.sh $DATE $SESSION $OUT_DIR 
+./scripts/sequence_graph/run_compute_sequence_graph.sh $DATE $SESSION $OUT_DIR $OUT_DIR
