@@ -1,8 +1,16 @@
-import sys
+import argparse
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+import json
+import io
+from shapely import wkb
+from pathlib import Path
 
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from scripts.database.rocksdb import RocksDB
 
 def plot_occupancy_map(data, save_path):
     """
@@ -15,7 +23,7 @@ def plot_occupancy_map(data, save_path):
         vmin=0,
         vmax=1,
         origin='lower',
-        aspect='auto'
+        aspect='equal'
     )
     plt.title('Occupancy Map')
     plt.xlabel('X')
@@ -34,7 +42,7 @@ def plot_elevation_map(data, save_path):
         cmap='terrain',
         vmax=10,  # Set upper limit
         origin='lower',
-        aspect='auto'
+        aspect='equal'
     )
     plt.colorbar(label='Elevation')
     plt.title('Elevation Map')
@@ -44,43 +52,23 @@ def plot_elevation_map(data, save_path):
     plt.close()  # Close the figure to free up memory
 
 
-def plot_map_with_contours(data):
+def plot_map_with_contours(data, polygon, save_path='elevation_with_boundary'):
     """
     Plots a map with an overlay of contour lines.
     
     Parameters:
     - data (2D array-like): The data for which the map and contours are to be plotted.
     """
-    plt.figure(figsize=(10, 8))
-
-    # Plot the heatmap
-    plt.imshow(
-        data,
-        cmap='terrain',
-        origin='lower',
-        aspect='auto'
-    )
-    plt.colorbar(label='Elevation')
-
-    # Generate x and y coordinates
-    x = np.arange(data.shape[1])
-    y = np.arange(data.shape[0])
-    X, Y = np.meshgrid(x, y)
-
-    # Overlay contour lines on the same figure
-    CS = plt.contour(
-        X, Y, data,
-        levels=20,         # Adjust number of contour levels as needed
-        colors='k',        # Contour line color
-        linewidths=0.5     # Line width for contours
-    )
-
-    # plt.clabel(CS, inline=True, fontsize=8, fmt='%.1f')  # Label contours
-
-    plt.title('Smoothed Elevation Map with Contours')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.show()
+    
+    plt.figure(figsize=(6, 6))
+    plt.imshow(data, cmap='terrain',  origin='lower')
+    x, y = polygon.exterior.xy
+    plt.plot(x, y, color='red', linewidth=2)
+    plt.title("Map with boundary")
+    plt.axis('off')
+    plt.tight_layout()
+    plt.savefig(save_path, bbox_inches='tight')
+    plt.close()
 
 
 def search_and_read_npy_file(directory, filename=None):
@@ -104,13 +92,51 @@ def search_and_read_npy_file(directory, filename=None):
     return None
 
 
+def get_map(date, session, sector, name):
+    key = {
+        "date": date,
+        'session': session,
+        'sector': sector,
+        'file_name': name
+    }   
+    raw_data = RocksDB().get(json.dumps(key))
+    buffer = io.BytesIO(raw_data)
+    return np.load(buffer, allow_pickle=True)
+
+def get_polygon(date, session, sector):
+    key = {
+        "date": date,
+        'session': session,
+        'sector': sector,
+        'file_name': 'boundary'
+    }   
+    data = RocksDB().get(json.dumps(key))
+    return wkb.loads(data)
+
 if __name__ == "__main__":
-    npy_path = sys.argv[1]     # Input elevation_map.npy folder
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--path', type=str)
+    parser.add_argument('--date', type=str)
+    parser.add_argument('--session',type=str)
+    parser.add_argument('--sector', type=str)
+    args = parser.parse_args()
 
-    elevation_map = search_and_read_npy_file(npy_path, filename='elevation_map.npy')
-    occupancy_map = search_and_read_npy_file(npy_path, filename='occupancy_map.npy')
+    path = Path(args.path, args.date, args.session, args.sector)
+    path.mkdir(parents=True, exist_ok=True)
 
-    plot_elevation_map(elevation_map, os.path.join(npy_path, "elevation_map.png")) # Result should saved in the Same folder
-    plot_occupancy_map(occupancy_map, os.path.join(npy_path, "occupancy_map.png")) # Result should saved in the Same folder
+    # elevation_map = search_and_read_npy_file(path, filename='elevation_map.npy')
+    # occupancy_map = search_and_read_npy_file(path, filename='occupancy_map.npy')
 
-# python plot_map.py ./sec4/
+
+    raw_elevation_map = get_map(args.date, args.session, args.sector, 'raw_elevation')
+    cropped_elevation_map = get_map(args.date, args.session, args.sector, 'cropped_elevation')
+    elevation_map = get_map(args.date, args.session, args.sector, 'elevation')
+    occupancy_map = get_map(args.date, args.session, args.sector, 'occupancy')
+    polygon = get_polygon(args.date, args.session, args.sector)
+
+    plot_elevation_map(raw_elevation_map, os.path.join(path, "raw_elevation_map.png")) # Result should saved in the Same folder
+    plot_elevation_map(cropped_elevation_map, os.path.join(path, "cropped_elevation_map.png")) # Result should saved in the Same folder
+    plot_elevation_map(elevation_map, os.path.join(path, "elevation_map.png")) # Result should saved in the Same folder
+    plot_occupancy_map(occupancy_map, os.path.join(path, "occupancy_map.png")) # Result should saved in the Same folder
+
+    plot_map_with_contours(elevation_map, polygon, os.path.join(path, "map_with_boundary.png"))

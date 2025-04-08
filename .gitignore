@@ -3,3 +3,7 @@
 *.mp4
 *.png
 *.gpickle
+*.pcd
+*.txt
+*.npy
+rocksdb/
