@@ -4,8 +4,11 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-./extract/bag_.sh "$1"
-./scripts/run_LeGO.sh "$1"
+SRC_PATH="${2:-/data}"
+SAVE_PATH="${3:-/lab/tmpig23b/vision_toolkit/data/bag_dump}"
+
+./extract/bag_.sh "$1" $SRC_PATH $SAVE_PATH
+./scripts/run_LeGO.sh "$1" $SRC_PATH $SAVE_PATH
 
 PROJECTION_FOLDER="$HOME/3d2d_ann"
 # Need to sync camera for syn_data

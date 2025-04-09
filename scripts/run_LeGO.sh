@@ -8,10 +8,11 @@ script_dir=$(dirname "$(realpath "$0")")
 date=$(basename "$1")
 
 session=0
-OUTPUT_DIR="/lab/tmpig23b/vision_toolkit/data/bag_dump/$1"
+SRC_DIR="${2:-/data}/$1"
+OUTPUT_DIR="${3:-/lab/tmpig23b/vision_toolkit/data/bag_dump}/$1"
 
 # Loop through each bag file and execute the script
-for bag_file in $(ls -v /data/$1/cam1/*.bag); do
+for bag_file in $(ls -v $SRC_DIR/$1/cam1/*.bag); do
     $script_dir/auto_LeGO.sh "$bag_file"
     
     sleep 30
