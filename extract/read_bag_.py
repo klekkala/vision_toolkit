@@ -13,9 +13,9 @@ parser.add_argument('--cam', type=str)
 parser.add_argument('--date', type=str)
 parser.add_argument('--session', type=str)
 parser.add_argument('--check', action='store_true')
-
+parser.add_argument('--save_path', type=str, default='/lab/tmpig23b/vision_toolkit/data/bag_dump')
 args = parser.parse_args()
-save_path = "/lab/tmpig23b/vision_toolkit/data/bag_dump/"+args.date+"/"+args.session+"/all_imgs/"
+save_path = args.save_path + '/' + args.date + "/" + args.session + "/all_imgs/"
 os.makedirs(save_path, exist_ok=True)
 
 try:
