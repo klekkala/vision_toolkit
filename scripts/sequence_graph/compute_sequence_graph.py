@@ -69,7 +69,7 @@ def get_polygon(date, session, sector):
     return wkb.loads(data)
 
 def get_guassian_splat(date, session, sector):
-    path = Path('/lab/kiran/navisim/haopeng/splat_files/3dgs_train/output/12a18dcf-1/point_cloud/iteration_7000/point_cloud.ply')
+    path = Path('/lab/kiran/navisim/haopeng/splat_files/3dgs_train/output/12a18dcf-1/point_cloud/iteration_30000/point_cloud.ply')
     pcd = o3d.t.io.read_point_cloud(str(path))
     if isinstance(pcd, o3d.cuda.pybind.geometry.PointCloud):
         print("Converting CUDA point cloud to CPU...")

@@ -12,4 +12,4 @@ OUT_DIR='.'
 
 ./scripts/sequence2sector/seq2sector.sh $DATE $SESSION $WINDOW_SIZE $SRC_DIR $OUT_DIR
 ./scripts/elevation_map/plot_elevation_map.sh $DATE $SESSION $OUT_DIR 
-./scripts/sequence_graph/run_compute_sequence_graph.sh $DATE $SESSION $OUT_DIR $OUT_DIR
+./scripts/sequence_graph/run_build_sequence_graph.sh $DATE $SESSION $OUT_DIR $OUT_DIR
