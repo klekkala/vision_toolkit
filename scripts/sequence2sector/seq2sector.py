@@ -82,7 +82,7 @@ def sequence2sector(date, session, src_dir, out_dir, window_size=20):
         window_poses = filter_poses_by_time_window(poses, timestamps, start_time, window_size)
         visible_pcd = get_visible_points(pcd, window_poses)
 
-        output_path = f'{date}/{session}/{index}'
+        output_path = f'{out_dir}/{date}/{session}/{index}'
 
         Path(output_path).mkdir(parents=True, exist_ok=True)
 
