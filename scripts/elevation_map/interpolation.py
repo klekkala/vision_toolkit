@@ -2,71 +2,44 @@ import numpy as np
 import scipy
 import scipy.interpolate
 import scipy.ndimage
-from scipy.ndimage import binary_dilation, binary_fill_holes
+from scipy.ndimage import binary_dilation, binary_fill_holes, label
 from scipy.interpolate import Rbf
 from scipy.ndimage import generic_filter
 
 # https://gis.stackexchange.com/questions/408665/using-python-for-interpolate-data-points-with-scipy-open-for-other-solutions-as
 
 
-def get_island_mask(elevation_map):
-    # Initial mask of valid points (non-NaN)
-    valid_mask = ~np.isnan(elevation_map)
-    
-    # Fill holes to identify the entire island shape (including internal NaNs)
-    island_mask = binary_fill_holes(valid_mask)
-
-    return island_mask
-
 def interpolation(data):
     # return nearest_linear_interpolation(data)
     return rbf_interpolation_within_island(data)
 
-def rbf_interpolation_within_island(data, function='linear', smooth=0):
-    # Step 1: Create island mask (NaNs inside the island will be interpolated, sea ignored)
+def rbf_interpolation_within_island(data, function='linear', smooth=10, dilation_iter=2):
+    # 1. Base valid mask (non-NaN)
     valid_mask = ~np.isnan(data)
-    island_mask = binary_fill_holes(valid_mask)
 
-    # Step 2: Separate valid and NaN points within the island only
+    # 2. Fill holes to get full "landmass", even with concavities
+    # Apply binary dilation first to merge disconnected land pixels (optional)
+    dilated_mask = binary_dilation(valid_mask, iterations=dilation_iter)
+    island_mask = binary_fill_holes(dilated_mask)
+
+    # 3. Interpolation input: valid points within island
     y_valid, x_valid = np.where(valid_mask & island_mask)
     z_valid = data[y_valid, x_valid]
 
     if len(z_valid) < 3:
-        raise ValueError("Not enough valid points within island for RBF interpolation.")
+        raise ValueError("Not enough valid points for interpolation.")
 
-    # Step 3: Fit RBF interpolator
     rbf = Rbf(x_valid, y_valid, z_valid, function=function, smooth=smooth)
 
-    # Step 4: Interpolate only NaNs within the island
+    # 4. Interpolate only the NaNs within the (dilated) island mask
     y_nan, x_nan = np.where(np.isnan(data) & island_mask)
     z_interp = rbf(x_nan, y_nan)
 
-    # Step 5: Replace NaNs in a copy of the data
+    # 5. Fill in interpolated values
     filled_data = data.copy()
     filled_data[y_nan, x_nan] = z_interp
 
     return filled_data
-
-# def rbf_interpolation(data, function='linear', smooth=0):
-#     from scipy.interpolate import Rbf
-#     valid_mask = ~np.isnan(data)
-#     y_valid, x_valid = np.where(valid_mask)
-#     z_valid = data[valid_mask]
-
-#     if len(z_valid) < 3:
-#         raise ValueError("Not enough valid points for RBF interpolation.")
-
-#     # RBF interpolator
-#     rbf = Rbf(x_valid, y_valid, z_valid, function=function, smooth=smooth)
-
-#     # Interpolate at NaN positions
-#     y_nan, x_nan = np.where(np.isnan(data))
-#     z_interp = rbf(x_nan, y_nan)
-
-#     # Copy the original map and fill in NaNs
-#     filled_map = data.copy()
-#     filled_map[y_nan, x_nan] = z_interp
-#     return filled_map
 
 # Legacy Interpolation methods
 def nearest_linear_interpolation(data):
