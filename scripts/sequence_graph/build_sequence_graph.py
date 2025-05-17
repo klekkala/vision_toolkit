@@ -90,14 +90,8 @@ def trajectory2np(trajectory_file):
 
 
 def build_sequence_graph(sequence, position=None):
-    sequence_map = {}
-
-    for idx, meta_data in enumerate(sequence):
-        node_id = idx
-        sequence_map[node_id] = meta_data
-
     g = nx.Graph()
-    for id, sectors in sequence_map.items():
+    for id, sectors in sequence.items():
         g.add_node(id, sectors = sectors, position=(0,0))
 
     trajectory_ids = list(g.nodes)
@@ -115,7 +109,7 @@ def build_sequence_graph(sequence, position=None):
     #         if _trajectories_cross(g.nodes[traj1_id]['position'], g.nodes[traj2_id]['position'], distance_threshold):
     #             g.add_edge(traj1_id, traj2_id)
 
-    return g, sequence_map
+    return g
 
 
 def _trajectories_cross(points1, points2, distance_threshold):
@@ -159,7 +153,7 @@ if __name__ == "__main__":
         sectors = get_sectors(args.path, date, session)
         sequence[iid] = sectors
 
-    g, seq_map = build_sequence_graph(sequence)
+    g = build_sequence_graph(sequence)
     output_path = Path(OUT)
     output_path.mkdir(parents=True, exist_ok=True)
 

@@ -2,6 +2,7 @@ import open3d as o3d
 import numpy as np
 import argparse
 
+from tqdm import tqdm
 from pathlib import Path
 from scipy.spatial.transform import Rotation as R
 
@@ -76,31 +77,30 @@ def sequence2sector(date, session, src_dir, out_dir, window_size=20):
     poses, timestamps = sort_poses_by_timestamp(poses, timestamps)
 
     start_time = min(timestamps)
-    index = 0
+    end_time = max(timestamps)
 
-    while start_time <= max(timestamps):
-        window_poses = filter_poses_by_time_window(poses, timestamps, start_time, window_size)
+    num_sectors = (end_time - start_time) // window_size + 1
+    current_time = start_time
+
+    for index in tqdm(range(num_sectors), desc="Generating sectors"):
+        window_poses = filter_poses_by_time_window(poses, timestamps, current_time, window_size)
         visible_pcd = get_visible_points(pcd, window_poses)
 
-        output_path = f'{out_dir}/{date}/{session}/{index}'
+        output_path = f'{out_dir}/{date}/{session}/sector{index}'
+        Path(f"{output_path}/pcd").mkdir(parents=True, exist_ok=True)
+        Path(f"{output_path}/odom").mkdir(parents=True, exist_ok=True)
 
-        Path(output_path).mkdir(parents=True, exist_ok=True)
+        save_point_cloud(f'{output_path}/pcd/sector.pcd', visible_pcd)
+        save_odometry(f"{output_path}/odom/odometry.txt", window_poses)
 
-        sector_output_path = f'{output_path}/sector.pcd'
-        odom_output_path = f"{output_path}/odometry.txt"
-
-        save_point_cloud(sector_output_path, visible_pcd)
-        save_odometry(odom_output_path, window_poses)
-        
-        index += 1
-        start_time += window_size
+        current_time += window_size
 
 if __name__ == "__main__":
     print('Build sectors from sequence')
     parser = argparse.ArgumentParser()
     parser.add_argument('--date', type=str)
     parser.add_argument('--session', type=int)
-    parser.add_argument('--window_size', type=int, default=20)
+    parser.add_argument('--window_size', type=int, default=20, help="Window size in seconds")
     parser.add_argument('--src_dir', type=str, default ='/lab/tmpig23b/vision_toolkit/data/bag_dump')
     parser.add_argument('--out_dir', type=str, default = '.')
 
