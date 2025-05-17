@@ -59,17 +59,13 @@ def build_elevation_occupancy_map(pcd_path, output_path):
     
     x_min, x_max, y_min, y_max = bbox
     elevation_map = elevation_map[y_min:y_max, x_min:x_max]
-
-    #TODO(jiwon-hae) : Remove cropped elevation map after testing
-    cropped_elevation = elevation_map.copy()
-    
     elevation_map = interpolation(elevation_map)
-    boundary_polygon = _get_boundary_polygon(cropped_elevation, name = 'interpolated')
+    boundary_polygon = _get_boundary_polygon(elevation_map, name = 'interpolated')
 
     occupancy_threshold = 2
     occupancy_map = (elevation_map >= occupancy_threshold).astype(int)
     
-    return raw_elevation_map, cropped_elevation, elevation_map, occupancy_map, boundary_polygon
+    return raw_elevation_map, elevation_map, occupancy_map, boundary_polygon
 
 def save_map(date, session, sector, map, name):
     buffer = io.BytesIO()
@@ -94,6 +90,19 @@ def save_polygon(date, session,sector, polygon):
     }
     RocksDB().save(json.dumps(key), polygon_bytes)
 
+def save_gaussian_splat(date, session, sector, file_path):
+    pcd = o3d.io.read_point_cloud(file_path)
+    o3d.io.write_point_cloud('point_cloud.ply', pcd)
+    with open('point_cloud.ply', "rb") as f:
+        data = f.read()
+        key = {
+            "date": date,
+            'session': session,
+            'sector': sector,
+            'file_name': 'gaussian'
+        }
+        RocksDB().save(json.dumps(key), data)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=str)
@@ -106,10 +115,11 @@ if __name__ == "__main__":
 
     path = Path(args.path, args.date, args.session, args.sector)
     pcd_path = Path(path, 'sector.pcd')
-    raw_elevation_map, cropped_elevation, elevation_map, occupancy_map, boundary_polygon = build_elevation_occupancy_map(pcd_path, path)
+    raw_elevation_map, elevation_map, occupancy_map, boundary_polygon = build_elevation_occupancy_map(pcd_path, path)
 
-    save_map(date = args.date, session = args.session, sector = args.sector, map = raw_elevation_map, name = 'raw_elevation')
-    save_map(date = args.date, session = args.session, sector = args.sector, map = cropped_elevation, name = 'cropped_elevation')
+    
+    save_gaussian_splat(date = args.date, session = args.session, sector = args.sector, file_path = '/lab/kiran/navisim/haopeng/splat_files/3dgs_train/output/12a18dcf-1/point_cloud/iteration_30000/point_cloud.ply')
+    save_map(date = args.date, session = args.session, sector = args.sector, map = raw_elevation_map, name = 'raw')
     save_map(date = args.date, session = args.session, sector = args.sector, map = elevation_map, name = 'elevation')
     save_map(date = args.date, session = args.session, sector = args.sector, map = occupancy_map, name = 'occupancy')
     save_polygon(date = args.date, session = args.session, sector = args.sector, polygon = boundary_polygon)
