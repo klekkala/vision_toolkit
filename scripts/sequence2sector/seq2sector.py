@@ -1,6 +1,7 @@
 import open3d as o3d
 import numpy as np
 import argparse
+import os
 
 from pathlib import Path
 from scipy.spatial.transform import Rotation as R
@@ -18,6 +19,8 @@ def get_visible_points(pcd, poses):
     return pcd.select_by_index(list(visible_points))  # Filter point cloud
 
 def save_point_cloud(output_path, pcd):
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
     success = o3d.io.write_point_cloud(output_path, pcd, write_ascii=False, compressed=False)
 
     if success:
@@ -27,6 +30,8 @@ def save_point_cloud(output_path, pcd):
     
 def save_odometry(output_path, poses):
     """Save odometry data to a file."""
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
     with open(output_path, 'w') as f:
         for pose in poses:
             x, y, z = pose[:3, 3]  # Extract translation
@@ -82,12 +87,12 @@ def sequence2sector(date, session, src_dir, out_dir, window_size=20):
         window_poses = filter_poses_by_time_window(poses, timestamps, start_time, window_size)
         visible_pcd = get_visible_points(pcd, window_poses)
 
-        output_path = f'{date}/{session}/{index}'
+        output_path = f'{out_dir}{date}/{session}/sector{index}'
 
         Path(output_path).mkdir(parents=True, exist_ok=True)
 
-        sector_output_path = f'{output_path}/sector.pcd'
-        odom_output_path = f"{output_path}/odometry.txt"
+        sector_output_path = f'{output_path}/pcd/sector.pcd'
+        odom_output_path = f"{output_path}/odom/odometry.txt"
 
         save_point_cloud(sector_output_path, visible_pcd)
         save_odometry(odom_output_path, window_poses)
@@ -100,7 +105,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--date', type=str)
     parser.add_argument('--session', type=int)
-    parser.add_argument('--window_size', type=int, default=20)
+    parser.add_argument('--window_size', type=int, default=20, help='Time window in seconds per sector')
     parser.add_argument('--src_dir', type=str, default ='/lab/tmpig23b/vision_toolkit/data/bag_dump')
     parser.add_argument('--out_dir', type=str, default = '.')
 
