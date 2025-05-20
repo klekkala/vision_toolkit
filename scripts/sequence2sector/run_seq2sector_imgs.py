@@ -27,7 +27,7 @@ def ensure_dir(path: Path):
 
 def save_images_to_sector(sector_idx, images, img_dir, output_dir, sector_map):
     sector_name = f"sector{sector_idx}"
-    sector_path = output_dir / sector_name
+    sector_path = output_dir / sector_name / 'imgs'
     ensure_dir(sector_path)
 
     for _, fname in tqdm(images, desc=f"[{sector_name}]", leave=False):
@@ -68,12 +68,12 @@ def main():
     parser.add_argument('--date', type=str, required=True)
     parser.add_argument('--session', type=str, default="0")
     parser.add_argument('--target', type=str, required=True)
-    parser.add_argument('--window', type=int, default=20)
+    parser.add_argument('--window', type=int, default=20, help='Time window in seconds per sector')
     args = parser.parse_args()
 
     img_dir = Path(args.src) / args.date / args.session / "all_imgs"
     output_dir = Path(args.target) / args.date / args.session
-    json_path = Path(args.src) / args.date / args.session / "sector_data.json"
+    json_path = Path(args.target) / args.date / args.session / "sector_data.json"
 
     print(f"Processing per-camera time-window images from: {img_dir}")
     print(f"Saving output to: {output_dir}")

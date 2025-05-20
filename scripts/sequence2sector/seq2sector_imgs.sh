@@ -12,6 +12,3 @@ SRC_IMG=$5
 OUT_IMG=$6
 
 python run_seq2sector_imgs.py --src "$SRC_IMG" --target "$OUT_IMG" --date "$DATE" --session "$SESSION"
-
-
-
