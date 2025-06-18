@@ -27,7 +27,7 @@ def ensure_dir(path: Path):
 
 def save_images_to_sector(sector_idx, images, img_dir, output_dir, sector_map):
     sector_name = f"sector{sector_idx}"
-    sector_path = output_dir / sector_name / 'imgs'
+    sector_path = output_dir / sector_name / 'input'
     ensure_dir(sector_path)
 
     for _, fname in tqdm(images, desc=f"[{sector_name}]", leave=False):

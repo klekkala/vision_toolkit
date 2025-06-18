@@ -15,8 +15,8 @@ from pathlib import Path
 from interpolation import *
 from read_map import *
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from scripts.database.rocksdb import RocksDB
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from database.rocksdb import RocksDB
 
 def _get_boundary_polygon(elevation_map, name):
     """
@@ -91,17 +91,19 @@ def save_polygon(date, session,sector, polygon):
     RocksDB().save(json.dumps(key), polygon_bytes)
 
 def save_gaussian_splat(date, session, sector, file_path):
-    pcd = o3d.io.read_point_cloud(file_path)
-    o3d.io.write_point_cloud('point_cloud.ply', pcd)
-    with open('point_cloud.ply', "rb") as f:
+    with open(file_path, "rb") as f:
         data = f.read()
-        key = {
-            "date": date,
-            'session': session,
-            'sector': sector,
-            'file_name': 'gaussian'
-        }
-        RocksDB().save(json.dumps(key), data)
+        
+    # Create key
+    key = {
+        "date": date,
+        "session": session,
+        "sector": sector,
+        "file_name": "gaussian"
+    }
+
+    # Save raw .ply bytes to RocksDict
+    RocksDB().save(json.dumps(key), data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -114,7 +116,7 @@ if __name__ == "__main__":
     print(f'Building elevation/occupancy map for {args.date}/{args.session}, sector{args.sector}')
 
     path = Path(args.path, args.date, args.session, args.sector)
-    pcd_path = Path(path, 'sector.pcd')
+    pcd_path = Path(path, 'sector_pointcloud.pcd')
     raw_elevation_map, elevation_map, occupancy_map, boundary_polygon = build_elevation_occupancy_map(pcd_path, path)
 
     

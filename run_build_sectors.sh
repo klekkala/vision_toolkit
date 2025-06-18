@@ -12,4 +12,4 @@ SRC_DIR='/lab/tmpig23b/vision_toolkit/data/bag_dump/'
 OUT_DIR='/lab/tmpig23b/vision_toolkit/data/gs_train/'
 
 ./scripts/sequence2sector/seq2sector.sh $DATE $SESSION $WINDOW_SIZE $SRC_DIR $OUT_DIR
-# ./scripts/elevation_map/run_build_elevation_occupancy_map.sh $DATE $SESSION $OUT_DIR 
+./scripts/elevation_map/run_build_elevation_occupancy_map.sh $DATE $SESSION $OUT_DIR 
