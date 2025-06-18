@@ -91,8 +91,8 @@ def sequence2sector(date, session, src_dir, out_dir, window_size=20):
 
         Path(output_path).mkdir(parents=True, exist_ok=True)
 
-        sector_output_path = f'{output_path}/pcd/sector.pcd'
-        odom_output_path = f"{output_path}/odom/odometry.txt"
+        sector_output_path = f'{output_path}/sector_pointcloud.pcd'
+        odom_output_path = f"{output_path}/odometry.txt"
 
         save_point_cloud(sector_output_path, visible_pcd)
         save_odometry(odom_output_path, window_poses)

@@ -37,7 +37,7 @@ def split_pcd_by_time(pcd_dir, output_dir, window=20):
     for ts, file_path in timestamps:
         sector_idx = int((ts - start_time) // window)
         sector_name = f"sector{sector_idx}"
-        sector_dir = Path(output_dir) / sector_name / 'pcl'
+        sector_dir = Path(output_dir) / sector_name / 'sector_pcl_scans'
         sector_dir.mkdir(parents=True, exist_ok=True)
 
         dest = sector_dir / file_path.name

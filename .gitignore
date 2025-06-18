@@ -4,6 +4,9 @@
 *.png
 *.gpickle
 *.pcd
-*.txt
 *.npy
+*.tar
+*.pyc
+
+2023_03_29/
 rocksdb/

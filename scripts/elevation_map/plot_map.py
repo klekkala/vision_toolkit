@@ -138,9 +138,8 @@ if __name__ == "__main__":
     # elevation_map = search_and_read_npy_file(path, filename='elevation_map.npy')
     # occupancy_map = search_and_read_npy_file(path, filename='occupancy_map.npy')
 
-
-    raw_elevation_map = get_map(args.date, args.session, args.sector, 'raw_elevation')
-    cropped_elevation_map = get_map(args.date, args.session, args.sector, 'cropped_elevation')
+    raw_elevation_map = get_map(args.date, args.session, args.sector, 'raw')
+    # cropped_elevation_map = get_map(args.date, args.session, args.sector, 'cropped_elevation')
     elevation_map = get_map(args.date, args.session, args.sector, 'elevation')
     occupancy_map = get_map(args.date, args.session, args.sector, 'occupancy')
     polygon = get_polygon(args.date, args.session, args.sector)
@@ -153,5 +152,5 @@ if __name__ == "__main__":
 
     # plot_map_with_contours(elevation_map, polygon, os.path.join(path, "map_with_boundary.png"))
     # plot_map_with_contours(occupancy_map, polygon, os.path.join(path, "occ_with_boundary.png"))
-    plot_map_with_contours(raw_elevation_map, polygon, os.path.join(path, "raw_elevation_map_with_boundary.png")) # Result should saved in the Same folder
+    # plot_map_with_contours(raw_elevation_map, polygon, os.path.join(path, "raw_elevation_map_with_boundary.png")) # Result should saved in the Same folder
     

@@ -17,8 +17,8 @@ from scipy.spatial import KDTree
 from scipy.spatial.transform import Rotation as R
 from pathlib import Path
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from scripts.database.rocksdb import RocksDB
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from database.rocksdb import RocksDB
 
 def get_sectors(path, date, session):
     directory = Path(path, date, session)
